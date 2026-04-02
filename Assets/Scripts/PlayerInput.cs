@@ -28,6 +28,7 @@ public class PlayerInput : MonoBehaviour
     {
         if (!HasPlayerController()) { return; }
         Debug.Log(context.ReadValue<Vector2>());
+        playerController.Rotate(context.ReadValue<Vector2>());
     }
 
     public void AttackPrimary(InputAction.CallbackContext context)

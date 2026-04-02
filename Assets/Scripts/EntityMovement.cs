@@ -143,10 +143,13 @@ public class EntityMovement : MonoBehaviour
     public void setRotatationInput(Vector2 rotationInput)
     {
         // Apply the max rotation angle
-        Vector3 newRot = new Vector3()
-        eulerRotation.x = Mathf.Clamp(eulerRotation.x, -maxRotationVerticalAngle, maxRotationVerticalAngle);
-        rotation = Quaternion.Euler(eulerRotation);
-        transform.rotation = rotation;
+        Vector3 newRot = new Vector3(
+            transform.rotation.x,
+            transform.rotation.y + rotationInput.x,
+            transform.rotation.z //transform.rotation.z + rotationInput.y
+        );
+        newRot.x = Mathf.Clamp(newRot.x, -maxRotationVerticalAngle, maxRotationVerticalAngle);
+        transform.rotation = Quaternion.Euler(newRot);
     }
 
     public void setSprintInput(bool input)

@@ -4,6 +4,7 @@ public class EntityMovement : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Rigidbody rb;
+    [SerializeField] private Transform entityHead;
 
     [Header("Movement Settings")]
     [SerializeField] private float walkSpeed;
@@ -59,11 +60,6 @@ public class EntityMovement : MonoBehaviour
 
         // Jump
         HandleJump();
-
-        // Reset the move input
-        moveInputX = 0;
-        moveInputY = 0;
-        jumpInput = false;
     }
 
     private void HandleJump()
@@ -100,6 +96,10 @@ public class EntityMovement : MonoBehaviour
         // In the air
         else
             rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMovementMultiplier, ForceMode.Force);
+
+        // Reset the movement
+        moveInputX = 0;
+        moveInputY = 0;
     }
 
     private void HandleDrag()
@@ -144,11 +144,11 @@ public class EntityMovement : MonoBehaviour
     {
         // Apply the max rotation angle
         Vector3 newRot = new Vector3(
-            transform.rotation.x,
+            transform.rotation.x - rotationInput.y,
             transform.rotation.y + rotationInput.x,
-            transform.rotation.z //transform.rotation.z + rotationInput.y
+            transform.rotation.z
         );
-        newRot.x = Mathf.Clamp(newRot.x, -maxRotationVerticalAngle, maxRotationVerticalAngle);
+        //newRot.y = Mathf.Clamp(newRot.y, -maxRotationVerticalAngle, maxRotationVerticalAngle);
         transform.rotation = Quaternion.Euler(newRot);
     }
 

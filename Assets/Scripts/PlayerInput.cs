@@ -54,7 +54,7 @@ public class PlayerInput : MonoBehaviour
     public void Jump(InputAction.CallbackContext context)
     {
         if (!HasPlayerController()) { return; }
-        if (context.ReadValue<bool>() == true) playerController.Jump();
+        if (context.ReadValue<float>() == 1) playerController.Jump();
     }
 
     public void Sprint(InputAction.CallbackContext context)

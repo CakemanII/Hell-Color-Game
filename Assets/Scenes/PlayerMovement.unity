@@ -169,6 +169,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 2901636}
+  entityHead: {fileID: 0}
   walkSpeed: 10
   sprintSpeed: 20
   groundDrag: 1
@@ -1026,7 +1027,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 982914932}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.13759738, y: 0.68125355, z: -0.13265087, w: -0.7066571}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.507, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1152,6 +1153,7 @@ GameObject:
   - component: {fileID: 1236916349}
   - component: {fileID: 1236916348}
   - component: {fileID: 1236916350}
+  - component: {fileID: 1236916351}
   m_Layer: 0
   m_Name: CinemachineCamera
   m_TagString: Untagged
@@ -1210,7 +1212,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1236916347}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.13759738, y: 0.68125355, z: -0.13265087, w: -0.7066571}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 1.507, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1236,6 +1238,19 @@ MonoBehaviour:
     RotationDamping: {x: 0, y: 0, z: 0}
     QuaternionDamping: 1
   FollowOffset: {x: 0, y: 0, z: 0}
+--- !u!114 &1236916351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1236916347}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4afa82ae3200b82408d605c3dbdd1e38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Damping: 0
 --- !u!1 &1284632110
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,11 +2,18 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public class EnemyMovement : MonoBehaviour
+public class EnemyController : MonoBehaviour
 {
     [Header("References")] 
     [SerializeField] private Transform target;
     [SerializeField] private EntityMovement entityMovement;
+    [SerializeField] private EntityHealth entityHealth;
+
+    private void Awake()
+    {
+        // Subscribe to the OnDeath event of the EntityHealth component
+        entityHealth.SubscribeToDeath(OnDeath);
+    }
 
     void Update()
     {
@@ -35,5 +42,10 @@ public class EnemyMovement : MonoBehaviour
 
         // Move foward using the entityMovement.
         entityMovement.SetMoveInput(new Vector2(0, 1));
+    }
+
+    private void OnDeath()
+    {
+        Destroy(gameObject);
     }
 }

@@ -46,6 +46,9 @@ public class EntityMovement : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        // Fix rotational angular velocity
+        rb.angularVelocity = new Vector3(rb.angularVelocity.x, 0, rb.angularVelocity.z);
+
         // Set isGrounded
         isGrounded = IsTouchingGround();
 

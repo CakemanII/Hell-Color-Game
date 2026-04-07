@@ -43,6 +43,7 @@ public class PlayerInput : MonoBehaviour
     public void AttackPrimary(InputAction.CallbackContext context)
     {
         if (!HasPlayerController()) { return; }
+        playerController.UsePrimary(context.ReadValue<float>() == 1);
     }
 
     public void AttackSecondary(InputAction.CallbackContext context)
@@ -71,19 +72,39 @@ public class PlayerInput : MonoBehaviour
         if (!HasPlayerController()) { return; }
         playerController.SetSprint(context.ReadValue<float>() == 1);
     }
-
-    public void InventorySlot1(InputAction.CallbackContext context) { }
-    public void InventorySlot2(InputAction.CallbackContext context) { }
-    public void InventorySlot3(InputAction.CallbackContext context) { }
-    public void InventorySlot4(InputAction.CallbackContext context) { }
-    public void InventorySlot5(InputAction.CallbackContext context) { }
-    public void InventorySlot6(InputAction.CallbackContext context) { }
-    public void InventorySlot7(InputAction.CallbackContext context) { }
-    public void InventorySlot8(InputAction.CallbackContext context) { }
-    public void InventorySlot9(InputAction.CallbackContext context) { }
-    public void InventorySlot10(InputAction.CallbackContext context) { }
-
     
+    #region Inventory Slots
+    public void InventorySlot1(InputAction.CallbackContext context)
+    { if (!HasPlayerController()) { return; } playerController.SetActiveInventorySlot(0); }
+
+    public void InventorySlot2(InputAction.CallbackContext context)
+    { if (!HasPlayerController()) { return; } playerController.SetActiveInventorySlot(1); }
+
+    public void InventorySlot3(InputAction.CallbackContext context)
+    { if (!HasPlayerController()) { return; } playerController.SetActiveInventorySlot(2); }
+
+    public void InventorySlot4(InputAction.CallbackContext context)
+    { if (!HasPlayerController()) { return; } playerController.SetActiveInventorySlot(3); }
+
+    public void InventorySlot5(InputAction.CallbackContext context)
+    { if (!HasPlayerController()) { return; } playerController.SetActiveInventorySlot(4); }
+
+    public void InventorySlot6(InputAction.CallbackContext context)
+    { if (!HasPlayerController()) { return; } playerController.SetActiveInventorySlot(5); }
+
+    public void InventorySlot7(InputAction.CallbackContext context)
+    { if (!HasPlayerController()) { return; } playerController.SetActiveInventorySlot(6); }
+
+    public void InventorySlot8(InputAction.CallbackContext context)
+    { if (!HasPlayerController()) { return; } playerController.SetActiveInventorySlot(7); }
+
+    public void InventorySlot9(InputAction.CallbackContext context)
+    { if (!HasPlayerController()) { return; } playerController.SetActiveInventorySlot(8); }
+
+    public void InventorySlot10(InputAction.CallbackContext context)
+    { if (!HasPlayerController()) { return; } playerController.SetActiveInventorySlot(9); }
+    #endregion
+
     private bool HasPlayerController()
     {
         if (playerController == null) { Debug.LogError("PlayerController is null"); return false; }

@@ -4,6 +4,8 @@ public class PlayerController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private EntityMovement entityMovement;
+    [SerializeField] private EntityInventory entityInventory;
+    [SerializeField] private EntityPrimaryEquippedHandler entityActiveItemHandler;
 
     private Vector2 moveInput;
     private Vector2 rotationInput;
@@ -21,4 +23,10 @@ public class PlayerController : MonoBehaviour
     public void Rotate(Vector2 input) { this.rotationInput = input; }
 
     public void SetSprint(bool input) { entityMovement.SetSprintInput(input); }
+
+    public void SetActiveInventorySlot(int slotIndex) { entityInventory.SetActivePrimarySlot(slotIndex); }
+
+    public void UsePrimary(bool input) { entityActiveItemHandler.ToggleUseEquippedItem(input); }
 }
+
+

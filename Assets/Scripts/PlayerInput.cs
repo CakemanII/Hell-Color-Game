@@ -5,12 +5,22 @@ public class PlayerInput : MonoBehaviour
 {
     private PlayerController playerController;
 
+    bool wantsToJump;
+
     void Awake()
     {
         // Hide the cursor
         Cursor.visible = false;
         // Lock the cursor to the center of the screen
         Cursor.lockState = CursorLockMode.Locked;
+    }
+
+    private void Update()
+    {
+        if (!HasPlayerController()) { return; }
+
+        // Handle Jump
+        if (wantsToJump) playerController.Jump();
     }
 
     public void Init(PlayerController playerControllers)
@@ -27,7 +37,6 @@ public class PlayerInput : MonoBehaviour
     public void Look(InputAction.CallbackContext context)
     {
         if (!HasPlayerController()) { return; }
-        Debug.Log(context.ReadValue<Vector2>());
         playerController.Rotate(context.ReadValue<Vector2>());
     }
 
@@ -54,12 +63,13 @@ public class PlayerInput : MonoBehaviour
     public void Jump(InputAction.CallbackContext context)
     {
         if (!HasPlayerController()) { return; }
-        if (context.ReadValue<float>() == 1) playerController.Jump();
+        wantsToJump = context.ReadValue<float>() == 1;
     }
 
     public void Sprint(InputAction.CallbackContext context)
     {
         if (!HasPlayerController()) { return; }
+        playerController.SetSprint(context.ReadValue<float>() == 1);
     }
 
     public void InventorySlot1(InputAction.CallbackContext context) { }

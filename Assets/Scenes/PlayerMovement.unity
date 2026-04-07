@@ -169,15 +169,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 2901636}
-  entityHead: {fileID: 0}
+  entityHead: {fileID: 1284632111}
   walkSpeed: 10
   sprintSpeed: 20
-  groundDrag: 1
+  groundDrag: 8
   maxRotationVerticalAngle: 90
-  jumpForce: 10
-  airMovementMultiplier: 0.4
+  rotationSensitivityX: 0.6
+  rotationSensitivityY: 0.6
+  jumpForce: 500
+  airMovementMultiplier: 0.02
   groundRaycastOrigin: {fileID: 694253617}
-  groundRaycastDistance: 0.1
+  groundRaycastDistance: 0.4
   groundLayer:
     serializedVersion: 2
     m_Bits: 128
@@ -205,7 +207,7 @@ Rigidbody:
   serializedVersion: 4
   m_Mass: 1
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -220,8 +222,8 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
+  m_Constraints: 80
+  m_CollisionDetection: 2
 --- !u!1 &194306019
 GameObject:
   m_ObjectHideFlags: 0
@@ -523,7 +525,7 @@ Transform:
   m_GameObject: {fileID: 694253616}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.086, z: 0}
+  m_LocalPosition: {x: 0, y: 0.01, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1119,7 +1121,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1225963866}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Environment
   m_TagString: Untagged
   m_Icon: {fileID: 0}

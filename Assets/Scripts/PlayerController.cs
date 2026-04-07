@@ -19,4 +19,6 @@ public class PlayerController : MonoBehaviour
     public void Jump() { entityMovement.Jump(); }
 
     public void Rotate(Vector2 input) { this.rotationInput = input; }
+
+    public void SetSprint(bool input) { entityMovement.setSprintInput(input); }
 }

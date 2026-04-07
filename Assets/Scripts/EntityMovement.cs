@@ -11,8 +11,11 @@ public class EntityMovement : MonoBehaviour
     [SerializeField] private float sprintSpeed;
     [Space()]
     [SerializeField] private float groundDrag;
-    [Space()]
+
+    [Header("Rotational Settings")]
     [SerializeField] private float maxRotationVerticalAngle;
+    [SerializeField] [Min(0)] private float rotationSensitivityX;
+    [SerializeField] [Min(0)] private float rotationSensitivityY;
 
     [Header("Jump Settings")]
     [SerializeField] private float jumpForce;
@@ -65,13 +68,13 @@ public class EntityMovement : MonoBehaviour
     private void HandleJump()
     {
         bool wantsToJump = jumpInput;
-        bool pastJumpTimeout = jumpInput && Time.time - timeLastJumped >= jumpTimeout;
+        bool pastJumpTimeout = Time.time - timeLastJumped >= jumpTimeout;
         if (isGrounded && wantsToJump && pastJumpTimeout)
         {
             rb.AddForce(transform.up * jumpForce);
             timeLastJumped = Time.time;
-            jumpInput = false;
         }
+        jumpInput = false;
     }
 
     private void HandleMoveSpeed()
@@ -142,14 +145,22 @@ public class EntityMovement : MonoBehaviour
 
     public void setRotatationInput(Vector2 rotationInput)
     {
-        // Apply the max rotation angle
-        Vector3 newRot = new Vector3(
-            transform.rotation.x - rotationInput.y,
-            transform.rotation.y + rotationInput.x,
-            transform.rotation.z
-        );
-        //newRot.y = Mathf.Clamp(newRot.y, -maxRotationVerticalAngle, maxRotationVerticalAngle);
-        transform.rotation = Quaternion.Euler(newRot);
+        // Get the rotation input and apply sensitivity
+        float rotationInputX = rotationInput.x * rotationSensitivityX;
+        float rotationInputY = rotationInput.y * rotationSensitivityY;
+
+        // Rotate body
+        transform.Rotate(0, rotationInputX, 0);
+
+        // Rotate head
+
+        // In your update / input code:
+        float currentVerticalRotation = entityHead.localRotation.eulerAngles.x - rotationInputY;
+        if (currentVerticalRotation > 180f) currentVerticalRotation -= 360f; // Convert to -180 to 180 range
+        float currentVerticalRotationClamped = Mathf.Clamp(currentVerticalRotation, -maxRotationVerticalAngle, maxRotationVerticalAngle);
+
+        // Apply rotation
+        entityHead.localRotation = Quaternion.Euler(currentVerticalRotationClamped, 0f, 0f);
     }
 
     public void setSprintInput(bool input)

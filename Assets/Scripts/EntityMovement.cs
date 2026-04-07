@@ -14,8 +14,8 @@ public class EntityMovement : MonoBehaviour
 
     [Header("Rotational Settings")]
     [SerializeField] private float maxRotationVerticalAngle;
-    [SerializeField][Min(0)] private float rotationSensitivityX;
-    [SerializeField][Min(0)] private float rotationSensitivityY;
+    [SerializeField] [Min(0)] private float rotationSensitivityX;
+    [SerializeField] [Min(0)] private float rotationSensitivityY;
 
     [Header("Jump Settings")]
     [SerializeField] private float jumpForce;

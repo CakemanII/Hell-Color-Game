@@ -164,7 +164,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectileDamage: 10
-  projectileSpeed: 18
+  projectileSpeed: 25
   projectileMaxLifetime: 5
   continuousFire: 1
   fireRate: 0.25

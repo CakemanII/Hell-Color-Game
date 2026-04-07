@@ -10,8 +10,8 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        entityMovement.setMoveInput(moveInput);
-        entityMovement.setRotatationInput(rotationInput);
+        entityMovement.SetMoveInput(moveInput);
+        entityMovement.SetRotatationInput(rotationInput);
     }
 
     public void Move(Vector2 input) { this.moveInput = input; }
@@ -20,5 +20,5 @@ public class PlayerController : MonoBehaviour
 
     public void Rotate(Vector2 input) { this.rotationInput = input; }
 
-    public void SetSprint(bool input) { entityMovement.setSprintInput(input); }
+    public void SetSprint(bool input) { entityMovement.SetSprintInput(input); }
 }

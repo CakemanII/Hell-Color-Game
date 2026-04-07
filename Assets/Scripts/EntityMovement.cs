@@ -125,7 +125,7 @@ public class EntityMovement : MonoBehaviour
         }
     }
 
-    public void setMoveInput(Vector2 input)
+    public void SetMoveInput(Vector2 input)
     {
         // Ensure input is between -1 and 1.
         if (Mathf.Abs(input.x) > 1)
@@ -143,7 +143,7 @@ public class EntityMovement : MonoBehaviour
         jumpInput = true;
     }
 
-    public void setRotatationInput(Vector2 rotationInput)
+    public void SetRotatationInput(Vector2 rotationInput)
     {
         // Get the rotation input and apply sensitivity
         float rotationInputX = rotationInput.x * rotationSensitivityX;
@@ -152,18 +152,20 @@ public class EntityMovement : MonoBehaviour
         // Rotate body
         transform.Rotate(0, rotationInputX, 0);
 
-        // Rotate head
+        if (entityHead)
+        {
+            // Rotate head
+            // In your update / input code:
+            float currentVerticalRotation = entityHead.localRotation.eulerAngles.x - rotationInputY;
+            if (currentVerticalRotation > 180f) currentVerticalRotation -= 360f; // Convert to -180 to 180 range
+            float currentVerticalRotationClamped = Mathf.Clamp(currentVerticalRotation, -maxRotationVerticalAngle, maxRotationVerticalAngle);
 
-        // In your update / input code:
-        float currentVerticalRotation = entityHead.localRotation.eulerAngles.x - rotationInputY;
-        if (currentVerticalRotation > 180f) currentVerticalRotation -= 360f; // Convert to -180 to 180 range
-        float currentVerticalRotationClamped = Mathf.Clamp(currentVerticalRotation, -maxRotationVerticalAngle, maxRotationVerticalAngle);
-
-        // Apply rotation
-        entityHead.localRotation = Quaternion.Euler(currentVerticalRotationClamped, 0f, 0f);
+            // Apply rotation
+            entityHead.localRotation = Quaternion.Euler(currentVerticalRotationClamped, 0f, 0f);
+        }
     }
 
-    public void setSprintInput(bool input)
+    public void SetSprintInput(bool input)
     {
         wantsToSprint = input;
     }

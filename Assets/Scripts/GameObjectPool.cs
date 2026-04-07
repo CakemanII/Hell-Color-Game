@@ -6,8 +6,13 @@ using UnityEngine;
 
 public class GameObjectPool : MonoBehaviour
 {
-    [SerializeField] private GameObject prefab;
+    private GameObject prefab;
     private readonly Queue<GameObject> _inactivePool = new();
+
+    public void Init(GameObject prefab)
+    {
+        this.prefab = prefab;
+    }
 
     public GameObject Get()
     {

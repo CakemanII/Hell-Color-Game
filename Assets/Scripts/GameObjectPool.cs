@@ -11,7 +11,7 @@ public class GameObjectPool : MonoBehaviour
 
     public void Init(GameObject prefab)
     {
-        this.prefab = prefab;
+        this.prefab = pref
     }
 
     public GameObject Get()

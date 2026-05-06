@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class BackgroundColor : MonoBehaviour
 {
@@ -15,6 +16,11 @@ public class BackgroundColor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        Camera.main.backgroundColor = colors[Random.Range(0, colors.Length)];
     }
+
+    /*IEnumerator Fade()
+    {
+
+    }*/
 }

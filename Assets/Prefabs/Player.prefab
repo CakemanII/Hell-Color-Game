@@ -84,7 +84,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d48442a6ba7a984bb215c5c7c566529, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  primaryInventorySlotsAmount: 3
+  maxPrimaryInventorySlots: 8
+  maxSecondaryInventorySlots: 30
 --- !u!114 &5191843728242332005
 MonoBehaviour:
   m_ObjectHideFlags: 0

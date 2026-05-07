@@ -21,7 +21,7 @@ public class EntityPrimaryEquippedHandler : MonoBehaviour
         Debug.Log("Swithcing equipped item in EntityPrimaryEquippedHandler");
 
         // Get the currently equipped item from the inventory
-        InventorySlot activeSlot = entityInventory.GetActivePrimarySlot();
+        SlotContent activeSlot = entityInventory.GetActivePrimarySlotContent();
 
         // Destroy current equipped item if exists
         Destroy(currentlyEquippedObject);
@@ -38,6 +38,7 @@ public class EntityPrimaryEquippedHandler : MonoBehaviour
                 currentlyEquippedObject.transform.SetParent(equippedItemParent, false);
                 currentlyEquippedObject.transform.localPosition = Vector3.zero; // Reset local position
                 currentlyEquippedObject.transform.localRotation = Quaternion.identity; // Reset local rotation
+                SetLayerOfEquippedObject();
             }
         }
     }
@@ -48,6 +49,15 @@ public class EntityPrimaryEquippedHandler : MonoBehaviour
         {
             // (temp)
             currentlyEquippedObject.GetComponent<Weapon_Pistol>().UseWeapon(use);
+        }
+    }
+
+    private void SetLayerOfEquippedObject()
+    {
+        currentlyEquippedObject.layer = equippedItemParent.gameObject.layer;
+        for (int i = 0; i < currentlyEquippedObject.transform.childCount; i++)
+        {
+            currentlyEquippedObject.transform.GetChild(i).gameObject.layer = equippedItemParent.gameObject.layer;
         }
     }
 }

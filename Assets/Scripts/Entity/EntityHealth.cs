@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-public class EntityHealth : MonoBehaviour
+public class EntityHealth : MonoBehaviour, IDamagable
 {
     [Header("Health Settings")]
     [SerializeField] private float maxHealth = 100f;

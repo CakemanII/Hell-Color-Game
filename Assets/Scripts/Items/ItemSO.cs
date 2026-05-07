@@ -12,10 +12,8 @@ public class ItemSO : ScriptableObject
     public GameObject itemCollectablePrefab;
     public GameObject itemEquipedPrefab;
     [Space()]
-    public GameObject itemIcon;
+    public Sprite itemIcon;
 
     [Header("Item Settings")]
-    public bool isStackable = false;
-    [Tooltip("Only applies if isStackable is true")]
     public int maxStackSize = 1;
 }

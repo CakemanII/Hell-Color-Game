@@ -3,15 +3,16 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - WorldObjectHolder
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Bullet
+  - Player
   - Water
   - UI
-  - 
+  - Bullet
   - 
   - 
   - 

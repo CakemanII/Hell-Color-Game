@@ -1,4 +1,4 @@
-/*using UnityEngine;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Events;
 
@@ -109,4 +109,4 @@ public class LevelManager : MonoBehaviour
     public LevelCollectionSO GetCurrentLevelCollection()
     { return activeLevelCollection; }
     #endregion
-}*/
+}

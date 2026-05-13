@@ -14,7 +14,9 @@ public class PlayerProjectile : MonoBehaviour
 
     [Header("Ammo Variables")]
     public int bullets;
+    public int capacity;
     public TextMeshProUGUI ammoText;
+    public TextMeshProUGUI capText;
 
     [Header("Initial Setup")]
     public Transform bulletSpawnTransform;
@@ -22,16 +24,20 @@ public class PlayerProjectile : MonoBehaviour
 
     private float timer;
 
+    private float bulletMin = 0, bulletMax = 10;
+    private float capMin = 0, capMax = 180;
+
     public void Update()
     {
         ammoText.text = bullets.ToString();
+        capText.text = capacity.ToString();
 
         if(timer > 0)
         {
             timer -= Time.deltaTime / fireRate;
         }
 
-        if (bullets == 0 && Input.GetKeyDown(KeyCode.R))
+        if (bullets >= 0 && Input.GetKeyDown(KeyCode.R))
         {
             bullets = 10;
         }

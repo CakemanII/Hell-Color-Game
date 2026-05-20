@@ -19,7 +19,7 @@ MonoBehaviour:
     offset: 0
   - direction: 1
     offset: 0
-  difficultyMin: 0
+  difficultyMin: 1
   difficultyMax: 10
   canBeStart: 1
   isEndRoom: 0

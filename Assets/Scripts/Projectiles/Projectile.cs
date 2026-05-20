@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 // Switch to object pooling
@@ -10,20 +11,30 @@ public class Projectile : MonoBehaviour
     private float damage;
     private float speed;
     private float maxLifetime;
+    private GameObjectPool objectPool;
 
     private bool hasCollided = false;
 
-    public void Init(float damage, float speed, float maxLifetime)
+    private float timeElapsed;
+
+    public void Init(float damage, float speed, float maxLifetime, GameObjectPool objectPool, Transform parent)
     {
         this.damage = damage;
         this.speed = speed;
         this.maxLifetime = maxLifetime;
+        this.objectPool = objectPool;
+        transform.parent = parent;
+        timeElapsed = 0;
     }
 
-    private void Start()
+    private void Update()
     {
-        // Destroy the projectile after its max lifetime to prevent clutter
-        Destroy(gameObject, maxLifetime);
+        timeElapsed += Time.deltaTime;
+        if (timeElapsed >= maxLifetime)
+        {
+            // Put back into the object pool instead of destroying.
+            objectPool.Return(gameObject);
+        }
     }
 
     private void FixedUpdate()
@@ -40,8 +51,8 @@ public class Projectile : MonoBehaviour
         // Handle collision logic, such as applying damage to the target
         ProjectileHit(collision);
 
-        // Destroy the projectile upon collision
-        Destroy(gameObject);
+        // Put back into the object pool instead of destroying.
+        objectPool.Return(gameObject);
     }
 
     private void ProjectileHit(Collision collision)

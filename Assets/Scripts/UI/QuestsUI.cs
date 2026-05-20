@@ -9,25 +9,23 @@ public class QuestsUI : MonoBehaviour
 
     [SerializeField] private float updateInterval = 1f;
 
-    private void Awake()
-    {
-        RefreshQuests();
-    }
+    private float timeElapsed;
 
-    private IEnumerator RefreshQuests()
+    private void Update()
     {
-        while (true)
+        timeElapsed += Time.deltaTime;
+        if (timeElapsed > updateInterval)
         {
             DisplayQuests();
-            yield return new WaitForSeconds(updateInterval);
+            timeElapsed = 0;
         }
     }
 
     private void DisplayQuests()
     {
-        while (questsParent.childCount > 0)
+        for (int i = questsParent.childCount - 1; i >= 0; i--)
         {
-            Destroy(questsParent.GetChild(0).gameObject);
+            Destroy(questsParent.GetChild(i).gameObject);
         }
 
         foreach (DailyQuest quest in QuestManager.Instance.DailyQuests)

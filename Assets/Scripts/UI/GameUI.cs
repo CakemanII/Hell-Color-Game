@@ -6,7 +6,8 @@ public enum UIType
     Inventory,
     Quests,
     Cheats,
-    MainHUD
+    MainHUD,
+    Settings
 }
 
 public class GameUI : MonoBehaviour
@@ -18,12 +19,16 @@ public class GameUI : MonoBehaviour
     [SerializeField] private GameObject questsUIObject;
     [SerializeField] private GameObject cheatsUIObject;
     [SerializeField] private GameObject MainHUDObject;
+    [SerializeField] private GameObject settingsUIObject;
 
     [SerializeField] private GameObject secondaryUI;
 
     [Header("Tab Button Texts")]
     [SerializeField] private TextMeshProUGUI inventoryButtonText;
     [SerializeField] private TextMeshProUGUI questsButtonText;
+
+    [Header("Loading Screen")]
+    [SerializeField] private GameObject loadingScreenObject;
 
     [Header("References")]
     [SerializeField] private PlayerInput playerInput;
@@ -39,21 +44,7 @@ public class GameUI : MonoBehaviour
         }
         Instance = this;
 
-        playerInput.OnPausePressed += OnPauseInput;
         SetUIBeingDisplayed(UIType.MainHUD);
-    }
-
-    private void OnDestroy()
-    {
-        playerInput.OnPausePressed -= OnPauseInput;
-    }
-
-    private void OnPauseInput()
-    {
-        if (uiDisplaying == UIType.MainHUD)
-            SetUIBeingDisplayed(UIType.Inventory);
-        else
-            SetUIBeingDisplayed(UIType.MainHUD);
     }
 
     public void SetSecondaryUIEnabled(bool enabled)
@@ -75,13 +66,15 @@ public class GameUI : MonoBehaviour
     {
         uiDisplaying = uiType;
         bool isMainHUD = uiType == UIType.MainHUD;
+        bool isSettings = uiType == UIType.Settings;
 
         playerInput.SetMouseLocked(isMainHUD);
-        secondaryUI.SetActive(!isMainHUD);
+        secondaryUI.SetActive(!isMainHUD && !isSettings);
 
         SetInventoryUIEnabled(uiType == UIType.Inventory);
         SetQuestsUIEnabled(uiType == UIType.Quests);
         SetCheatsUIEnabled(uiType == UIType.Cheats);
+        SetSettingsUIEnabled(isSettings);
         SetMainHUDUIEnabled(isMainHUD);
         UpdateTabUnderlines();
     }
@@ -100,8 +93,14 @@ public class GameUI : MonoBehaviour
             text.fontStyle &= ~FontStyles.Underline;
     }
 
+    public void SetLoadingScreen(bool active)
+    {
+        if (loadingScreenObject != null) loadingScreenObject.SetActive(active);
+    }
+
     private void SetInventoryUIEnabled(bool enabled) => inventoryUIObject.SetActive(enabled);
     private void SetQuestsUIEnabled(bool enabled) => questsUIObject.SetActive(enabled);
     private void SetCheatsUIEnabled(bool enabled) => cheatsUIObject.SetActive(enabled);
+    private void SetSettingsUIEnabled(bool enabled) => settingsUIObject.SetActive(enabled);
     private void SetMainHUDUIEnabled(bool enabled) => MainHUDObject.SetActive(enabled);
 }

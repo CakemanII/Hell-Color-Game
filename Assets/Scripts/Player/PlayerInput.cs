@@ -8,7 +8,7 @@ public class PlayerInput : MonoBehaviour
     bool wantsToJump;
     private bool allowLook = true;
 
-    public event System.Action OnPausePressed;
+    private bool playerInputEnabled = true;
 
     void Awake()
     {
@@ -17,6 +17,7 @@ public class PlayerInput : MonoBehaviour
 
     private void Update()
     {
+        if (!playerInputEnabled) return;
         if (!HasPlayerController()) { return; }
         if (wantsToJump) playerController.Jump();
     }
@@ -35,57 +36,67 @@ public class PlayerInput : MonoBehaviour
 
     public void Move(InputAction.CallbackContext context)
     {
+        if (!playerInputEnabled) return;
         if (!HasPlayerController()) { return; }
         playerController.Move(context.ReadValue<Vector2>());
     }
 
     public void Look(InputAction.CallbackContext context)
     {
+        if (!playerInputEnabled) return;
         if (!HasPlayerController() || !allowLook) { return; }
         playerController.Rotate(context.ReadValue<Vector2>());
     }
 
     public void Pause(InputAction.CallbackContext context)
     {
+        if (!playerInputEnabled) return;
         if (!context.performed) return;
         GameManager.Instance.TogglePause();
     }
 
     public void AttackPrimary(InputAction.CallbackContext context)
     {
+        if (!playerInputEnabled) return;
         if (!HasPlayerController() || GameUI.Instance.uiDisplaying != UIType.MainHUD) { return; }
         playerController.UsePrimary(context.ReadValue<float>() == 1);
     }
 
     public void AttackSecondary(InputAction.CallbackContext context)
     {
+        if (!playerInputEnabled) return;
         if (!HasPlayerController()) { return; }
     }
 
     public void Interact(InputAction.CallbackContext context)
     {
+        if (!playerInputEnabled) return;
         if (!HasPlayerController()) { return; }
     }
 
     public void Crouch(InputAction.CallbackContext context)
     {
+        if (!playerInputEnabled) return;
         if (!HasPlayerController()) { return; }
     }
 
     public void Jump(InputAction.CallbackContext context)
     {
+        if (!playerInputEnabled) return;
         if (!HasPlayerController()) { return; }
         wantsToJump = context.ReadValue<float>() == 1;
     }
 
     public void Sprint(InputAction.CallbackContext context)
     {
+        if (!playerInputEnabled) return;
         if (!HasPlayerController()) { return; }
         playerController.SetSprint(context.ReadValue<float>() == 1);
     }
 
     public void Reload(InputAction.CallbackContext context)
     {
+        if (!playerInputEnabled) return;
         if (!context.performed || !HasPlayerController() || GameUI.Instance.uiDisplaying != UIType.MainHUD) { return; }
         playerController.Reload(context.ReadValue<float>() == 1);
     }
@@ -93,6 +104,7 @@ public class PlayerInput : MonoBehaviour
     public void OpenSecondaryMenu(InputAction.CallbackContext context)
     {
         if (!context.performed) return;
+        if (!playerInputEnabled) return;
         if (GameUI.Instance.uiDisplaying == UIType.Inventory || GameUI.Instance.uiDisplaying == UIType.Quests)
         {
             GameUI.Instance.SetUIBeingDisplayed(UIType.MainHUD);
@@ -106,6 +118,7 @@ public class PlayerInput : MonoBehaviour
     public void OpenCheatsMenu(InputAction.CallbackContext context)
     {
         if (!context.performed) return;
+        if (!playerInputEnabled) return;
         if (GameUI.Instance.uiDisplaying == UIType.Cheats)
         {
             GameUI.Instance.SetUIBeingDisplayed(UIType.MainHUD);
@@ -156,7 +169,11 @@ public class PlayerInput : MonoBehaviour
 
     private bool HasPlayerController()
     {
-        if (playerController == null) { Debug.LogError("PlayerController is null"); return false; }
-        return true;
+        return playerController != null;
+    }
+
+    public void SetPlayerInputEnabled(bool enabled)
+    {
+        playerInputEnabled = enabled;
     }
 }

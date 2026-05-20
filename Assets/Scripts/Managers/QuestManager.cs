@@ -23,9 +23,11 @@ public class QuestManager : MonoBehaviour
 {
     public static QuestManager Instance { private set; get; }
 
-    public List<DailyQuest> DailyQuests { private set; get; }
+    public DailyQuest[] DailyQuests;
     private float secondsTillMidnight = 0;
     public float SecondsTillMidnight => secondsTillMidnight;
+
+    public int CurrentScore { get; private set; } = 0;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
@@ -62,7 +64,7 @@ public class QuestManager : MonoBehaviour
     private const int TimezoneOffset = -4;
     private const int QuestCount = 5;
 
-    private static List<DailyQuest> GetDailyQuests()
+    private static DailyQuest[] GetDailyQuests()
     {
         DateTime utcNow = DateTime.UtcNow;
         DateTime localTime = utcNow.AddHours(TimezoneOffset);
@@ -72,7 +74,7 @@ public class QuestManager : MonoBehaviour
         // Master seed for the day
         System.Random masterRandom = new System.Random(dayNumber);
 
-        var quests = new List<DailyQuest>();
+        var quests = new DailyQuest[QuestCount];
 
         for (int i = 0; i < QuestCount; i++)
         {
@@ -97,13 +99,13 @@ public class QuestManager : MonoBehaviour
             r.NextBytes(bytes);
             Guid id = new Guid(bytes);
 
-            quests.Add(new DailyQuest
+            quests[i] = new DailyQuest
             {
                 id = id,
                 type = type,
                 quantity = quantity,
                 questName = questName
-            });
+            };
         }
 
         return quests;
@@ -126,6 +128,11 @@ public class QuestManager : MonoBehaviour
             if (quest.type == questType && quest.currentProgress < quest.quantity)
                 quest.currentProgress++;
         }
+    }
+
+    public void AddScore(int scoreToAdd)
+    {
+        CurrentScore += scoreToAdd;
     }
 
     public void IncrementKillEnemies() => IncrementQuests(QuestType.KillEnemies);

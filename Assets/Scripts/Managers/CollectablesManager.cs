@@ -38,6 +38,8 @@ public class CollectablesManager : MonoBehaviour
             SpawnCollectable(leftOverContent.item, leftOverContent.quantity, leftOverContent.essentialItemReference, playerInventory.transform.position + rotation * (Vector3.one / 2), rotation, standardDropForce);
         }
 
+        QuestManager.Instance.IncrementCollectItems();
+
         return true;
     }
 

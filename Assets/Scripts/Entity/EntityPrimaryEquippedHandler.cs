@@ -25,6 +25,10 @@ public class EntityPrimaryEquippedHandler : MonoBehaviour
     public TypeEquipped GetTypeEquipped() => typeEquipped;
     public GameObject GetEquippedObject() => currentlyEquippedObject;
     public Item GetEquippedObjectItem() => currentlyEquippedObject?.GetComponent<Item>();
+    public bool IsEquippedWeaponReloading() =>
+        currentlyEquippedObject != null &&
+        currentlyEquippedObject.GetComponent<ProjectileWeapon>() is ProjectileWeapon pw &&
+        pw.IsReloading;
 
     void Awake()
     {

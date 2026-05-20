@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30c96b7052cb25f47a101688fda9cab1, type: 3}
   m_Name: MediumAmmo
   m_EditorClassIdentifier: 
-  itemCollectablePrefab: {fileID: 0}
-  itemEquipedPrefab: {fileID: 0}
+  itemCollectablePrefab: {fileID: 6867536715861442634, guid: 4ba320a1e8b62064791cefe76033415a, type: 3}
+  itemEquipedPrefab: {fileID: 8597304244967020461, guid: dbeedf8e046d20749b72c74c9ceb2e14, type: 3}
   itemIcon: {fileID: 21300000, guid: 86497f8d5fd7f204b9dd410825371c30, type: 3}
   maxStackSize: 120
   importantItem: 0

@@ -1,13 +1,9 @@
-using NUnit.Framework;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.VisualScripting.AssemblyQualifiedNameParser;
 using UnityEngine;
 using UnityEngine.Events;
 using System.Collections;
-using UnityEditor.Build;
 
+[System.Serializable]
 public class SlotContent
 {
     public ItemSO item; // Will convert to gameobject
@@ -88,7 +84,12 @@ public class EntityInventory : MonoBehaviour
 
     private void DropItem(ItemSO item, int amount, GameObject essentialItemReference)
     {
-        CollectablesManager.Instance.SpawnCollectable(item, amount, essentialItemReference, transform.position, transform.Find("CameraPosition").transform.rotation);
+        if (amount <= 0 || item == null) return;
+        // Duck tape fix
+        if (item.importantItem && item.itemEquipedPrefab.TryGetComponent(out ProjectileWeapon weapon))
+            weapon.DisableInfiniteAmmoOnDrop();
+
+        CollectablesManager.Instance.SpawnCollectable(item, amount, essentialItemReference, transform.position, Quaternion.Euler(Vector3.zero));
     }
 
     #region Essential Inventory Functions
@@ -237,13 +238,23 @@ public class EntityInventory : MonoBehaviour
         // Stop if slot index is out of range
         if (slotIndex < 0 || slotIndex >= currentInventorySlotsAmount) return slotContent;
 
-        // Set the item and quantity in the specified slot
-        currentInventorySlots[slotIndex].item = slotContent.item;
-
+        // Set the item and quantity in the specified slot; clear if empty
         int amountToAdd = (ignoreStackingLimit || slotContent.item == null)
             ? slotContent.quantity
             : Mathf.Min(slotContent.quantity, slotContent.item.maxStackSize);
-        currentInventorySlots[slotIndex].quantity = amountToAdd;
+
+        if (amountToAdd <= 0 || slotContent.item == null)
+        {
+            currentInventorySlots[slotIndex].item                 = null;
+            currentInventorySlots[slotIndex].quantity             = 0;
+            currentInventorySlots[slotIndex].essentialItemReference = null;
+        }
+        else
+        {
+            currentInventorySlots[slotIndex].item                 = slotContent.item;
+            currentInventorySlots[slotIndex].quantity             = amountToAdd;
+            currentInventorySlots[slotIndex].essentialItemReference = slotContent.essentialItemReference;
+        }
 
         // Return any remaining items that couldn't fit in the slot
         InvokeBothInventoryEvents();
@@ -545,7 +556,8 @@ public class EntityInventory : MonoBehaviour
     public void DropInventoryFloatingSlot()
     {
         SlotContent currentSlot = GetFloatingSlotContents();
-        DropItem(currentSlot.item, currentSlot.quantity, currentSlot.essentialItemReference);
+        if (currentSlot.item != null && currentSlot.quantity > 0)
+            DropItem(currentSlot.item, currentSlot.quantity, currentSlot.essentialItemReference);
         ClearInventoryFloatingSlot();
     }
 

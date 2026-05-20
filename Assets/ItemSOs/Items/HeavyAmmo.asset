@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30c96b7052cb25f47a101688fda9cab1, type: 3}
   m_Name: HeavyAmmo
   m_EditorClassIdentifier: 
-  itemCollectablePrefab: {fileID: 0}
-  itemEquipedPrefab: {fileID: 0}
+  itemCollectablePrefab: {fileID: 5897317775809367239, guid: ab31fb996ba79224dac5f06467e70255, type: 3}
+  itemEquipedPrefab: {fileID: 2725123939721790502, guid: bbfedafcc1609f44c93b28055e65065c, type: 3}
   itemIcon: {fileID: 21300000, guid: 286652d5a7c39514e998612a0eca2251, type: 3}
   maxStackSize: 24
   importantItem: 0

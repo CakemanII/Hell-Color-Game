@@ -40,8 +40,6 @@ public class EnemyController : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         agent.updatePosition = false;
         agent.updateRotation = false;
-
-        entityHealth.SubscribeToDeath(OnDeath);
     }
 
     private void Start()
@@ -98,7 +96,7 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
-        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
+        if (agent.isOnNavMesh && !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
         {
             roamWaitTimer -= Time.deltaTime;
             if (roamWaitTimer <= 0f)
@@ -113,7 +111,7 @@ public class EnemyController : MonoBehaviour
         if (dist <= attackRange) { SetState(EnemyState.Attack); return; }
         if (dist > lostRange)    { SetState(EnemyState.Roam);   return; }
 
-        agent.SetDestination(player.position);
+        if (agent.isOnNavMesh) agent.SetDestination(player.position);
         RotateTowards(player.position);
     }
 
@@ -146,7 +144,8 @@ public class EnemyController : MonoBehaviour
 
         // Convert NavMesh world-space velocity to entity local-space input
         Vector3 localDir = transform.InverseTransformDirection(agent.desiredVelocity.normalized);
-        entityMovement.SetMoveInput(new Vector2(localDir.x, localDir.z));
+        Vector2 moveInput = new Vector2(localDir.x, localDir.z);
+        entityMovement.SetMoveInput(moveInput.sqrMagnitude > 1f ? moveInput.normalized : moveInput);
     }
 
     private void RotateTowards(Vector3 targetPosition)
@@ -173,6 +172,4 @@ public class EnemyController : MonoBehaviour
     }
 
     private float DistanceToPlayer() => Vector3.Distance(transform.position, player.position);
-
-    private void OnDeath() => Destroy(gameObject);
 }

@@ -12,6 +12,8 @@ public class MainHUD : MonoBehaviour
     [SerializeField] private Transform primaryInventoryParentLeft;
     [SerializeField] private Transform primaryInventoryParentRight;
     [SerializeField] private TextMeshProUGUI itemStateDisplayText;
+    [SerializeField] private TextMeshProUGUI enemyDisplayText;
+    [SerializeField] private TextMeshProUGUI scoreDisplayText;
     [Space()]
     [SerializeField] private GameObject inventorySlotPrefab;
 
@@ -21,21 +23,29 @@ public class MainHUD : MonoBehaviour
 
     private List<InventorySlot> primaryInventorySlots = new List<InventorySlot>();
 
-    private void Start()
-    {
-        UpdatePlayerReferences();
-        if (playerInventory == null) { Debug.LogError("Player inventory is null in MainHUD."); return; }
-
-        InitializeInventoryPrimaryUI();
-
-        playerInventory.SubscribeToInventoryChange(UpdatePrimaryInventorySlots);
-        playerInventory.SubscribeToInventoryEquippedChange(UpdateActiveInventorySlot);
-        UpdateActiveInventorySlot();
-        UpdateAllInventorySlots();
-    }
+    private bool initialized = false;
 
     private void Update()
     {
+        if (!initialized)
+        {
+            if (GameManager.Instance.Player != null)
+            {
+                UpdatePlayerReferences();
+                if (playerInventory != null)
+                {
+                    InitializeInventoryPrimaryUI();
+
+                    playerInventory.SubscribeToInventoryChange(UpdatePrimaryInventorySlots);
+                    playerInventory.SubscribeToInventoryEquippedChange(UpdateActiveInventorySlot);
+                    UpdateActiveInventorySlot();
+                    UpdateAllInventorySlots();
+                    initialized = true;
+                }
+            }
+            return;
+        }
+
         if (GameManager.Instance.Player == null) return;
         UpdatePlayerReferences();
 
@@ -44,6 +54,9 @@ public class MainHUD : MonoBehaviour
 
         // Update state display
         UpdateStateDisplay();
+
+        // Update score and enemy count
+        UpdateScoreAndEnemyCount();
     }
 
     private void UpdatePlayerReferences()
@@ -150,5 +163,11 @@ public class MainHUD : MonoBehaviour
             activeInventorySlotHighlight.SetParent(primaryInventoryParentLeft.GetChild(activeSlotIndex));
             activeInventorySlotHighlight.localPosition = Vector3.zero;
         }
+    }
+
+    private void UpdateScoreAndEnemyCount()
+    {
+        enemyDisplayText.text = $"Enemies: {EnemySpawnerManager.Instance.GetEnemyCount()}";
+        scoreDisplayText.text = $"Score: {QuestManager.Instance.CurrentScore}";
     }
 }

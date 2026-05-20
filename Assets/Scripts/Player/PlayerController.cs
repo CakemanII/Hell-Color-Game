@@ -24,9 +24,9 @@ public class PlayerController : MonoBehaviour
 
     public void SetSprint(bool input) { entityMovement.SetSprintInput(input); }
 
-    public void SetActiveInventorySlot(int slotIndex) { entityInventory.SetActivePrimarySlot(slotIndex); }
-    public void SetNextSlotActiveInInventory() { entityInventory.SetActivePrimarySlot(entityInventory.GetNextPrimarySlotIndex()); }
-    public void SetPrevSlotActiveInInventory() { entityInventory.SetActivePrimarySlot(entityInventory.GetPreviousPrimarySlotIndex()); }
+    public void SetActiveInventorySlot(int slotIndex) { if (entityActiveItemHandler.IsEquippedWeaponReloading()) return; entityInventory.SetActivePrimarySlot(slotIndex); }
+    public void SetNextSlotActiveInInventory() { if (entityActiveItemHandler.IsEquippedWeaponReloading()) return; entityInventory.SetActivePrimarySlot(entityInventory.GetNextPrimarySlotIndex()); }
+    public void SetPrevSlotActiveInInventory() { if (entityActiveItemHandler.IsEquippedWeaponReloading()) return; entityInventory.SetActivePrimarySlot(entityInventory.GetPreviousPrimarySlotIndex()); }
 
     public void UsePrimary(bool input) { entityActiveItemHandler.ToggleUseEquippedItem(input); }
 

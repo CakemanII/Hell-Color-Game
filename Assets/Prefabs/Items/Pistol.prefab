@@ -77,12 +77,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 850f8e6180f658749aac87b803e14acb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  projectileDamage: 10
+  projectileDamage: 25
   projectileSpeed: 50
   projectileMaxLifetime: 5
   continuousFire: 0
   fireRate: 0.5
-  reloadTime: 1.5
+  inifiteAmmo: 0
+  reloadEjectTime: 0.6
+  reloadInsertTime: 0.9
   magazineSize: 12
   initialAmmoInMagazine: 12
   ammoType: 0

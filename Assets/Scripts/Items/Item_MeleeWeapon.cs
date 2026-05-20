@@ -13,9 +13,6 @@ public class MeleeWeapon : Item
 
     [Header("Animation")]
     [SerializeField] private float damageApplicationTimePercentage = 0.2f; // X Percentage through the animation
-    [SerializeField] private Animator anim;
-    [SerializeField] private string attackAnimationTrigger = "Attack";
-    [SerializeField] private string attackAnimationStateName = "Attack";
 
     private float previousAttackTime;
 
@@ -44,31 +41,19 @@ public class MeleeWeapon : Item
     {
         // Start the sequence
         StartCoroutine(AttackSequence());
-
-        // Play the animation
-        anim.speed = attackDuration;
-        anim.SetTrigger(attackAnimationTrigger);
-
         yield return null;
     }
 
     private IEnumerator AttackSequence()
     {
-        // Wait until the animation starts
-        yield return new WaitUntil(() => anim.GetCurrentAnimatorStateInfo(0).IsName(attackAnimationStateName));
-
         // Wait until the animation reaches the point where damage should be applied
-        float animationDuration = anim.GetCurrentAnimatorStateInfo(0).length;
-        float animationSpeed = anim.speed;
-
-        // Wait until the animation reaches the point where damage should be applied
-        yield return new WaitForSeconds(animationDuration * damageApplicationTimePercentage / animationSpeed);
+        yield return new WaitForSeconds(attackDuration * damageApplicationTimePercentage);
 
         // Apply damage to any entities in range
         ApplyDamage();
 
         // Wait for the animation to finish
-        yield return new WaitUntil(() => !anim.GetCurrentAnimatorStateInfo(0).IsName(attackAnimationStateName));
+        yield return new WaitForSeconds(attackDuration * (1 - damageApplicationTimePercentage));
     }
 
     private void ApplyDamage()

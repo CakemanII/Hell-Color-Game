@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public enum AmmoType
@@ -18,7 +19,12 @@ public class ProjectileWeapon : Item
     [SerializeField] private bool continuousFire = false;
     [SerializeField] private float fireRate = 0.5f;
     [Space()]
-    [SerializeField] private float reloadTime = 1.5f;
+    [SerializeField] private bool inifiteAmmo = false;
+    [Space()]
+    [Tooltip("Time to eject the current magazine.")]
+    [SerializeField] private float reloadEjectTime = 0.6f;
+    [Tooltip("Time to seat the new magazine after loading ammo.")]
+    [SerializeField] private float reloadInsertTime = 0.9f;
     [SerializeField] private int magazineSize = 12;
     [SerializeField] private int initialAmmoInMagazine = 12;
     [SerializeField] private AmmoType ammoType;
@@ -32,17 +38,29 @@ public class ProjectileWeapon : Item
     [SerializeField] private ItemSO heavyAmmoSO;
     [SerializeField] private ItemSO mediumAmmoSO;
 
+    public void DisableInfiniteAmmoOnDrop() { inifiteAmmo = false; }
+
     private int currentAmmoInMagazine;
     public int CurrentAmmoInMagazine => currentAmmoInMagazine;
     public int MagazineSize => magazineSize;
 
     private float previousFireTime;
 
+    private GameObjectPool projectilePool;
+    private Transform projectileParent;
+
     // For continuous / non-continuous fire modes
     private bool weaponUsedPreviously;
 
     private bool entityWantsToReload;
     private bool isReloading;
+    public bool IsReloading => isReloading;
+
+    private void Awake()
+    {
+        projectilePool = ObjectPoolManager.Instance.GetObjectPool(projectilePrefab);
+        projectileParent = GameObject.Find("Projectiles").transform;
+    }
 
     private void Start()
     {
@@ -81,7 +99,8 @@ public class ProjectileWeapon : Item
             previousFireTime = Time.time;
             weaponUsedPreviously = true;
             // Set the projectile's properties and instantiate it
-            currentAmmoInMagazine--;
+            if (!inifiteAmmo)
+                currentAmmoInMagazine--;
             InitializeProjectile();
         }
     }
@@ -92,11 +111,12 @@ public class ProjectileWeapon : Item
         GameObject projectile = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
 
         // Set the projectile's damage and range
-        projectile.GetComponent<Projectile>().Init(projectileDamage, projectileSpeed, projectileMaxLifetime);
+        projectile.GetComponent<Projectile>().Init(projectileDamage, projectileSpeed, projectileMaxLifetime, projectilePool, projectileParent);
     }
 
     private void AttemptReload()
     {
+        if (inifiteAmmo) return;
         // Check conditions
         bool isNotFull = currentAmmoInMagazine < magazineSize;
         bool hasAmmoInInventory = true; // TODO: Check inventory for ammo
@@ -114,28 +134,22 @@ public class ProjectileWeapon : Item
     private IEnumerator ReloadSequence()
     {
         EntityInventory inventory = GetComponentInParent<EntityInventory>();
+        ItemSO ammoSO = ammoType == AmmoType.Heavy ? heavyAmmoSO : mediumAmmoSO;
 
-        // Take all ammo out of mag and put it back in inventory.
+        // Phase 1: Eject magazine — return current ammo to inventory.
         int ammoInMag = currentAmmoInMagazine;
         currentAmmoInMagazine = 0;
-        inventory.AppendItemToSecondaryInventory(
-            new SlotContent()
-            {
-                item = ammoType == AmmoType.Heavy ? heavyAmmoSO : mediumAmmoSO,
-                quantity = ammoInMag
-            }
-        );
-        
-        // Play anim and stuff
-        yield return new WaitForSeconds(reloadTime);
+        if (ammoInMag > 0)
+            inventory.AppendItemToSecondaryInventory(new SlotContent { item = ammoSO, quantity = ammoInMag });
 
+        yield return new WaitForSeconds(reloadEjectTime);
 
-        // Attempt to find ammo in inventory and put it in mag.
-        SlotContent slotContent = inventory.TakeItemFromBothInventories(
-            ammoType == AmmoType.Heavy ? heavyAmmoSO : mediumAmmoSO,
-            magazineSize
-         );
-        currentAmmoInMagazine = slotContent.quantity;
+        // Phase 2: Insert new magazine — take ammo from inventory.
+        SlotContent taken = inventory.TakeItemFromBothInventories(ammoSO, magazineSize);
+        currentAmmoInMagazine = taken.quantity;
+
+        yield return new WaitForSeconds(reloadInsertTime);
+
         isReloading = false;
     }
 

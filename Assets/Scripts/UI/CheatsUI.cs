@@ -21,6 +21,7 @@ public class CheatsUI : MonoBehaviour
     public void EnterCommand()
     {
         string input = inputField.text;
+        inputField.text = "";
         CheatsManager.Instance.CheatInput(input);
     }
 

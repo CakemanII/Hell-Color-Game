@@ -1,9 +1,8 @@
-using NUnit.Framework;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
-using UnityEditor.ShaderKeywordFilter;
 
 public class InventoryUI : MonoBehaviour
 {
@@ -23,16 +22,33 @@ public class InventoryUI : MonoBehaviour
     private List<InventorySlot> primaryInventorySlots = new List<InventorySlot>();
     private List<InventorySlot> secondaryInventorySlots = new List<InventorySlot>();
 
-    private void Start()
+    private bool initialized = false;
+
+    private void Update()
     {
-        if (gameManager == null) { Debug.LogError("GameManager reference is missing in InventoryUI."); return; }
+        floatingSlot.position = Input.mousePosition;
+
+        // Drop floating item when clicking outside any UI element
+        if (initialized && playerInventory != null
+            && Input.GetMouseButtonDown(0)
+            && playerInventory.GetFloatingSlotContents().item != null
+            && !EventSystem.current.IsPointerOverGameObject())
+        {
+            playerInventory.DropInventoryFloatingSlot();
+        }
+
+        if (initialized) return;
+        if (gameManager == null || GameManager.Instance.Player == null) { return; }
 
         playerInventory = GameManager.Instance.Player?.GetComponent<EntityInventory>();
-        if (playerInventory == null) { Debug.LogError("Player inventory is null in InventoryUI."); return; }
+        if (playerInventory == null) {  return; }
 
         InitializeInventoryUI();
         InitializeListeners();
         UpdateAllInventorySlots();
+        UpdateFloatingInventorySlot();
+
+        initialized = true;
     }
 
     private void InitializeInventoryUI()
@@ -76,10 +92,24 @@ public class InventoryUI : MonoBehaviour
     public void UpdateFloatingInventorySlot()
     {
         SlotContent floatingSlotContent = playerInventory.GetFloatingSlotContents();
+        bool hasItem = floatingSlotContent.item != null;
+        floatingSlot.gameObject.SetActive(hasItem);
         floatingInventorySlot.SetData(
-            floatingSlotContent.item != null ? floatingSlotContent.item.itemIcon : null, 
+            hasItem ? floatingSlotContent.item.itemIcon : null,
             floatingSlotContent.quantity
         );
+    }
+
+    private void OnDisable()
+    {
+        if (playerInventory != null)
+            playerInventory.DropInventoryFloatingSlot();
+    }
+
+    public void OnBackgroundClicked()
+    {
+        if (playerInventory != null)
+            playerInventory.DropInventoryFloatingSlot();
     }
 
     private void UpdateInventoryIconAtDisplay(int slotIndex, InventoryType inventoryType)
@@ -98,11 +128,6 @@ public class InventoryUI : MonoBehaviour
             primaryInventorySlots[slotIndex].SetData(itemIcon, quantity);
         else
             secondaryInventorySlots[slotIndex].SetData(itemIcon, quantity);
-    }
-
-    private void Update()
-    {
-        floatingSlot.position = Input.mousePosition;
     }
 
     private void InitializeListeners()

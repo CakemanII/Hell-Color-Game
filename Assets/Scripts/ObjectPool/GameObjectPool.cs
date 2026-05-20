@@ -2,11 +2,14 @@
    when they're finished. New Objects are only created if all the
    current objects are in use. */
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class GameObjectPool : MonoBehaviour
 {
     [SerializeField] private GameObject prefab;
+    public GameObject Prefab => prefab;
+
     private readonly Queue<GameObject> _inactivePool = new();
 
     public GameObject Get()

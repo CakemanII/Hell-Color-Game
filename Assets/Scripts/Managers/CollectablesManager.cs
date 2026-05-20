@@ -46,7 +46,7 @@ public class CollectablesManager : MonoBehaviour
     public void SpawnCollectable(ItemSO item, int quantity, GameObject essentialItemReference, Vector3 position, Quaternion direction, float? standardDropForce = null)
     {
         if (standardDropForce == null) standardDropForce = this.standardDropForce;
-        GameObject collectable = Instantiate(item.itemCollectablePrefab, position, Quaternion.Euler(Vector3.up) );
+        GameObject collectable = Instantiate(item.itemCollectablePrefab, position, Quaternion.Euler(Vector3.up));
         collectable.GetComponent<Collectable>().Init(quantity, (float)standardDropForce, direction, essentialItemReference);
     }
 }

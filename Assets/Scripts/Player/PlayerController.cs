@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour
     {
         entityMovement.SetMoveInput(moveInput);
         entityMovement.SetRotatationInput(rotationInput);
+        rotationInput = Vector2.zero;
     }
 
     public void Move(Vector2 input) { this.moveInput = input; }

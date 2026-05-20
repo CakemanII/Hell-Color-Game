@@ -50,7 +50,6 @@ public class PlayerInput : MonoBehaviour
 
     public void Pause(InputAction.CallbackContext context)
     {
-        if (!playerInputEnabled) return;
         if (!context.performed) return;
         GameManager.Instance.TogglePause();
     }

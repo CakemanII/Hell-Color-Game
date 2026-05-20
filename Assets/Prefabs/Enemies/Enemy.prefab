@@ -120,13 +120,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 481565877427287975}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0.34968022, y: 0.6145927, z: 0.6145924, w: 0.34967956}
   m_LocalPosition: {x: 0.00074, y: 0.00151, z: 0.00049}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1187812472295359168}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 120.724}
 --- !u!1 &820957904883909033
 GameObject:
   m_ObjectHideFlags: 0
@@ -1819,7 +1819,7 @@ MonoBehaviour:
   groundRaycastDistance: 0.02
   groundLayer:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 713
   jumpTimeout: 0.2
 --- !u!114 &7799232992745409575
 MonoBehaviour:
@@ -1863,11 +1863,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc1666af29dd38746ae1c0a37292b950, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPlayer: 0
+  weaponLayerName: CameraWeapon
   entityInventory: {fileID: 7587603094044703910}
   equippedItemParent: {fileID: 6231356708227196300}
-  equippedItemLayer:
-    serializedVersion: 2
-    m_Bits: 128
 --- !u!195 &8987294677189232889
 NavMeshAgent:
   m_ObjectHideFlags: 0

@@ -29,7 +29,6 @@ public class QuestManager : MonoBehaviour
 
     public int CurrentScore { get; private set; } = 0;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
         if (Instance != null)
@@ -40,19 +39,16 @@ public class QuestManager : MonoBehaviour
         }
         Instance = this;
 
-        // Get Daily Quests
         DailyQuests = GetDailyQuests();
+        LoadQuestProgress();
     }
 
     private void Update()
     {
-        // Check only if midnight has passed
-        if ( secondsTillMidnight <= -0.5f )
+        if (secondsTillMidnight <= -0.5f)
         {
-            // Refresh Daily Quests
-            GetDailyQuests();
-
-            // Calculate seconds till next midnight
+            DailyQuests = GetDailyQuests();
+            LoadQuestProgress();
             secondsTillMidnight = GetSecondsUntilMidnight();
         }
         else
@@ -127,6 +123,38 @@ public class QuestManager : MonoBehaviour
         {
             if (quest.type == questType && quest.currentProgress < quest.quantity)
                 quest.currentProgress++;
+        }
+        SaveQuestProgress();
+    }
+
+    private void SaveQuestProgress()
+    {
+        PlayerPrefs.SetInt("quest_count", DailyQuests.Length);
+        for (int i = 0; i < DailyQuests.Length; i++)
+        {
+            PlayerPrefs.SetString($"quest_{i}_id", DailyQuests[i].id.ToString());
+            PlayerPrefs.SetInt($"quest_{i}_progress", DailyQuests[i].currentProgress);
+        }
+        PlayerPrefs.Save();
+    }
+
+    private void LoadQuestProgress()
+    {
+        int savedCount = PlayerPrefs.GetInt("quest_count", 0);
+
+        var savedProgress = new Dictionary<Guid, int>();
+        for (int i = 0; i < savedCount; i++)
+        {
+            string idStr = PlayerPrefs.GetString($"quest_{i}_id", "");
+            int progress = PlayerPrefs.GetInt($"quest_{i}_progress", 0);
+            if (Guid.TryParse(idStr, out Guid id))
+                savedProgress[id] = progress;
+        }
+
+        foreach (var quest in DailyQuests)
+        {
+            if (savedProgress.TryGetValue(quest.id, out int progress))
+                quest.currentProgress = progress;
         }
     }
 

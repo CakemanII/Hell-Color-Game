@@ -10,10 +10,12 @@ public enum TypeEquipped
 
 public class EntityPrimaryEquippedHandler : MonoBehaviour
 {
+    [SerializeField] private bool isPlayer = false;
+    [SerializeField] private string weaponLayerName = "Weapon";
+
     [Header("References")]
     [SerializeField] EntityInventory entityInventory;
     [SerializeField] Transform equippedItemParent;
-    [SerializeField] LayerMask equippedItemLayer;
 
     public EntityInventory GetEntityInventory() => entityInventory;
 
@@ -90,6 +92,9 @@ public class EntityPrimaryEquippedHandler : MonoBehaviour
             currentlyEquippedObject.transform.localRotation = Quaternion.identity;
             SetLayerOfEquippedObject();
         }
+
+        float v = isPlayer ? 1f : 0.01719806f;
+        currentlyEquippedObject.transform.localScale = Vector3.one * v;
     }
 
     private void SetEquippedType(SlotContent activeSlot)
@@ -118,7 +123,13 @@ public class EntityPrimaryEquippedHandler : MonoBehaviour
 
     private void SetLayerOfEquippedObject()
     {
-        int layerIndex = (int)Mathf.Log(equippedItemLayer.value, 2);
+        if (!isPlayer) return;
+        int layerIndex = LayerMask.NameToLayer(weaponLayerName);
+        if (layerIndex < 0)
+        {
+            Debug.LogError($"[EntityPrimaryEquippedHandler] Layer '{weaponLayerName}' not found. Add it in Edit > Project Settings > Tags and Layers.");
+            return;
+        }
         SetLayerRecursively(currentlyEquippedObject, layerIndex);
     }
 

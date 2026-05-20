@@ -17,3 +17,4 @@ MonoBehaviour:
   itemIcon: {fileID: 21300000, guid: 45209aebb10961b4aba9e870db4d6cb1, type: 3}
   maxStackSize: 1
   importantItem: 1
+  collectableScale: {x: 0.2, y: 0.2, z: 0.2}

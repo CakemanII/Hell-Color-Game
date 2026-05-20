@@ -101,11 +101,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc1666af29dd38746ae1c0a37292b950, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isPlayer: 1
+  weaponLayerName: CameraWeapon
   entityInventory: {fileID: 5593807618753838469}
   equippedItemParent: {fileID: 86034054401876160}
-  equippedItemLayer:
-    serializedVersion: 2
-    m_Bits: 128
 --- !u!114 &4309785366750634525
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -147,7 +146,7 @@ MonoBehaviour:
   groundRaycastDistance: 0.4
   groundLayer:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 137
   jumpTimeout: 0.2
 --- !u!54 &2853129861653585242
 Rigidbody:

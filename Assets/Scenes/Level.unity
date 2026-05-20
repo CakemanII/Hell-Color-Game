@@ -207,7 +207,19 @@ MonoBehaviour:
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1736210883}
+        m_TargetAssemblyTypeName: SettingsUI, Assembly-CSharp
+        m_MethodName: OnMusicVolumeChanged
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &32999960
 GameObject:
   m_ObjectHideFlags: 0
@@ -889,6 +901,7 @@ GameObject:
   - component: {fileID: 194306026}
   - component: {fileID: 194306027}
   - component: {fileID: 194306028}
+  - component: {fileID: 194306029}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -1032,6 +1045,7 @@ MonoBehaviour:
   mainMusic:
   - {fileID: 8300000, guid: 8a42390b59eb56245bc15d9fc25a777a, type: 3}
   - {fileID: 8300000, guid: 766a16da1436d8b499231b83493db6c3, type: 3}
+  - {fileID: 8300000, guid: f534c11e41d1f3f418d84dbcd8d42160, type: 3}
 --- !u!114 &194306027
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1068,6 +1082,20 @@ MonoBehaviour:
   - EnemyPrefab: {fileID: 4979559735232855891, guid: 917f31da1f5e2c141bfa380dd3202ae1, type: 3}
     spawnChance: 1
   spawnPointTag: EnemySpawn
+--- !u!114 &194306029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 194306019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 220bee2f036e9334d8c0c9c61b91a248, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainMenuSceneName: MainMenu
+  levelSceneName: Level
 --- !u!1 &251682988
 GameObject:
   m_ObjectHideFlags: 0
@@ -1553,7 +1581,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 405146702}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 194306021}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: TogglePause
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &405146702
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1742,7 +1782,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 511350836}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 194306029}
+        m_TargetAssemblyTypeName: SceneLoader, Assembly-CSharp
+        m_MethodName: QuitGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &511350836
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3558,7 +3610,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc290180fa25bdc408a45819c8dd05ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponLayerName: Weapon
+  weaponLayerName: CameraWeapon
   weaponNearClip: 0.01
 --- !u!82 &982914939
 AudioSource:
@@ -3880,7 +3932,7 @@ RectTransform:
   m_Father: {fileID: 1882798083}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -4804,7 +4856,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1255455767
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4938,6 +4990,7 @@ MonoBehaviour:
   questsUIObject: {fileID: 1971627381}
   cheatsUIObject: {fileID: 1706982507}
   MainHUDObject: {fileID: 1805058286}
+  settingsUIObject: {fileID: 1736210878}
   secondaryUI: {fileID: 847331156}
   inventoryButtonText: {fileID: 1181860014}
   questsButtonText: {fileID: 318259843}
@@ -5799,8 +5852,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abce5ac18dd8db8488605c33ec00cea0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  settingsPanel: {fileID: 1255455766}
-  mainMenuSceneName: MainMenu
   musicSlider: {fileID: 655861}
 --- !u!1 &1804428749
 GameObject:
@@ -6095,7 +6146,7 @@ RectTransform:
   m_Father: {fileID: 1053539455}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}

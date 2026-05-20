@@ -46,9 +46,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d147ff0aee9f6b4bb1575da7a0b5e63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 500
+  damage: 30
   attackDuration: 0.2
-  hitPointRadius: 4
+  hitPointRadius: 0.1
   hitPoint: {fileID: 6688458397068983830}
   damageApplicationTimePercentage: 0.2
 --- !u!1 &4455109805903438831

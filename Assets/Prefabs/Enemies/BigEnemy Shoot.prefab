@@ -8,6 +8,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 997425779821622000, guid: a360d27aa049043469eb6aefa477af23, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7646363
+      objectReference: {fileID: 0}
+    - target: {fileID: 997425779821622000, guid: a360d27aa049043469eb6aefa477af23, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.000000009313227
+      objectReference: {fileID: 0}
+    - target: {fileID: 997425779821622000, guid: a360d27aa049043469eb6aefa477af23, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.64446217
+      objectReference: {fileID: 0}
+    - target: {fileID: 997425779821622000, guid: a360d27aa049043469eb6aefa477af23, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.0000001420267
+      objectReference: {fileID: 0}
+    - target: {fileID: 997425779821622000, guid: a360d27aa049043469eb6aefa477af23, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -80.251
+      objectReference: {fileID: 0}
     - target: {fileID: 3137267554281534192, guid: a360d27aa049043469eb6aefa477af23, type: 3}
       propertyPath: m_Name
       value: BigEnemy Shoot

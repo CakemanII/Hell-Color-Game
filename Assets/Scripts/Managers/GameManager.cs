@@ -43,6 +43,11 @@ public class GameManager : MonoBehaviour
         Instance = this;
     }
 
+    private void Start()
+    {
+        AudioManager.Instance.PlayMusic();
+    }
+
     private void Update()
     {
         if (currentLevel == -1)
@@ -62,6 +67,7 @@ public class GameManager : MonoBehaviour
                 currentLevel++;
                 currentWave = 0;
                 gameIsActive = false;
+                AudioManager.Instance.SelectMainMusic();
                 QuestManager.Instance.AddScore(currentWave * 150 * currentLevel);
                 CreateLevel();
             }
@@ -106,8 +112,10 @@ public class GameManager : MonoBehaviour
             SpawnPlayer();
         else
         {
-            player.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
-            player.position = Vector3.zero;
+            Rigidbody rb = player.GetComponent<Rigidbody>();
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.position = Vector3.zero;
         }
         levelGenerationManager.OnGenerationComplete -= OnLevelReady;
 
@@ -147,6 +155,7 @@ public class GameManager : MonoBehaviour
     private void PauseGame()
     {
         isGamePaused = true;
+        playerInput.SetPlayerInputEnabled(false);
         audioManager.PauseAudios();
         Time.timeScale = 0f;
         gameUI.SetUIBeingDisplayed(UIType.Settings);
@@ -155,6 +164,7 @@ public class GameManager : MonoBehaviour
     private void UnpauseGame()
     {
         isGamePaused = false;
+        playerInput.SetPlayerInputEnabled(true);
         audioManager.PlayMusic();
         Time.timeScale = 1f;
         gameUI.SetUIBeingDisplayed(UIType.MainHUD);

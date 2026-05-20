@@ -6,26 +6,31 @@ public class PlayerInput : MonoBehaviour
     private PlayerController playerController;
 
     bool wantsToJump;
+    private bool allowLook = true;
+
+    public event System.Action OnPausePressed;
 
     void Awake()
     {
-        // Hide the cursor
-        Cursor.visible = false;
-        // Lock the cursor to the center of the screen
-        Cursor.lockState = CursorLockMode.Locked;
+        SetMouseLocked(true);
     }
 
     private void Update()
     {
         if (!HasPlayerController()) { return; }
-
-        // Handle Jump
         if (wantsToJump) playerController.Jump();
     }
 
     public void Init(PlayerController playerControllers)
     {
         this.playerController = playerControllers;
+    }
+
+    public void SetMouseLocked(bool locked)
+    {
+        allowLook = locked;
+        Cursor.visible = !locked;
+        Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
     }
 
     public void Move(InputAction.CallbackContext context)
@@ -36,13 +41,19 @@ public class PlayerInput : MonoBehaviour
 
     public void Look(InputAction.CallbackContext context)
     {
-        if (!HasPlayerController()) { return; }
+        if (!HasPlayerController() || !allowLook) { return; }
         playerController.Rotate(context.ReadValue<Vector2>());
+    }
+
+    public void Pause(InputAction.CallbackContext context)
+    {
+        if (!context.performed) return;
+        GameManager.Instance.TogglePause();
     }
 
     public void AttackPrimary(InputAction.CallbackContext context)
     {
-        if (!HasPlayerController()) { return; }
+        if (!HasPlayerController() || GameUI.Instance.uiDisplaying != UIType.MainHUD) { return; }
         playerController.UsePrimary(context.ReadValue<float>() == 1);
     }
 
@@ -72,7 +83,39 @@ public class PlayerInput : MonoBehaviour
         if (!HasPlayerController()) { return; }
         playerController.SetSprint(context.ReadValue<float>() == 1);
     }
-    
+
+    public void Reload(InputAction.CallbackContext context)
+    {
+        if (!context.performed || !HasPlayerController() || GameUI.Instance.uiDisplaying != UIType.MainHUD) { return; }
+        playerController.Reload(context.ReadValue<float>() == 1);
+    }
+
+    public void OpenSecondaryMenu(InputAction.CallbackContext context)
+    {
+        if (!context.performed) return;
+        if (GameUI.Instance.uiDisplaying == UIType.Inventory || GameUI.Instance.uiDisplaying == UIType.Quests)
+        {
+            GameUI.Instance.SetUIBeingDisplayed(UIType.MainHUD);
+        }
+        else
+        {
+            GameUI.Instance.SetUIBeingDisplayed(UIType.Inventory);
+        }
+    }
+
+    public void OpenCheatsMenu(InputAction.CallbackContext context)
+    {
+        if (!context.performed) return;
+        if (GameUI.Instance.uiDisplaying == UIType.Cheats)
+        {
+            GameUI.Instance.SetUIBeingDisplayed(UIType.MainHUD);
+        }
+        else
+        {
+            GameUI.Instance.SetUIBeingDisplayed(UIType.Cheats);
+        }
+    }
+
     #region Inventory Slots
     public void InventorySlot1(InputAction.CallbackContext context)
     { if (!HasPlayerController()) { return; } playerController.SetActiveInventorySlot(0); }
@@ -103,6 +146,12 @@ public class PlayerInput : MonoBehaviour
 
     public void InventorySlot10(InputAction.CallbackContext context)
     { if (!HasPlayerController()) { return; } playerController.SetActiveInventorySlot(9); }
+
+    public void InventorySlotNext(InputAction.CallbackContext context)
+    { if (!HasPlayerController()) { return; } playerController.SetNextSlotActiveInInventory(); }
+
+    public void InventorySlotPrevious(InputAction.CallbackContext context)
+    { if (!HasPlayerController()) { return; } playerController.SetPrevSlotActiveInInventory(); }
     #endregion
 
     private bool HasPlayerController()

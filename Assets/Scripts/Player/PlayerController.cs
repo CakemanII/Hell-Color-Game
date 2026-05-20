@@ -25,8 +25,15 @@ public class PlayerController : MonoBehaviour
     public void SetSprint(bool input) { entityMovement.SetSprintInput(input); }
 
     public void SetActiveInventorySlot(int slotIndex) { entityInventory.SetActivePrimarySlot(slotIndex); }
+    public void SetNextSlotActiveInInventory() { entityInventory.SetActivePrimarySlot(entityInventory.GetNextPrimarySlotIndex()); }
+    public void SetPrevSlotActiveInInventory() { entityInventory.SetActivePrimarySlot(entityInventory.GetPreviousPrimarySlotIndex()); }
 
     public void UsePrimary(bool input) { entityActiveItemHandler.ToggleUseEquippedItem(input); }
+
+    public void Reload(bool input)
+    {
+        entityActiveItemHandler.AttemptSetReload(input);
+    }
 }
 
 

@@ -16,4 +16,5 @@ public class ItemSO : ScriptableObject
 
     [Header("Item Settings")]
     public int maxStackSize = 1;
+    public bool importantItem = false;
 }

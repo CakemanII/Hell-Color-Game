@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7233705289433287155}
   m_Layer: 6
   m_Name: CameraPosition
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -46,9 +46,10 @@ GameObject:
   - component: {fileID: 4309785366750634525}
   - component: {fileID: 5973991819013267624}
   - component: {fileID: 2853129861653585242}
+  - component: {fileID: 4669928386540246773}
   m_Layer: 6
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -86,6 +87,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxPrimaryInventorySlots: 8
   maxSecondaryInventorySlots: 30
+  mediumAmmo: {fileID: 11400000, guid: bb8763808dc09cc4badba5190054e021, type: 2}
+  heavyAmmo: {fileID: 11400000, guid: 0daf871d664989d4c891e9362298fdf5, type: 2}
 --- !u!114 &5191843728242332005
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -100,6 +103,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   entityInventory: {fileID: 5593807618753838469}
   equippedItemParent: {fileID: 86034054401876160}
+  equippedItemLayer:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!114 &4309785366750634525
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -170,6 +176,20 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 80
   m_CollisionDetection: 2
+--- !u!114 &4669928386540246773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2761386026160730564}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df279a7560ee5d5409727429610a2b66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 50
+  initialHealth: 50
 --- !u!1 &5300559935670342205
 GameObject:
   m_ObjectHideFlags: 0
@@ -181,7 +201,7 @@ GameObject:
   - component: {fileID: 6906818163729033620}
   m_Layer: 6
   m_Name: GroundPoint
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -215,7 +235,7 @@ GameObject:
   - component: {fileID: 1948622338336478954}
   m_Layer: 6
   m_Name: Model
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -322,7 +342,7 @@ GameObject:
   - component: {fileID: 3547815358740010766}
   m_Layer: 6
   m_Name: FirePoint
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -353,7 +373,7 @@ GameObject:
   - component: {fileID: 86034054401876160}
   m_Layer: 6
   m_Name: ItemHoldPoint
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -367,7 +387,7 @@ Transform:
   m_GameObject: {fileID: 9051810294055683731}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.50399995, z: 0.642}
+  m_LocalPosition: {x: 0.45, y: -0.329, z: 0.642}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

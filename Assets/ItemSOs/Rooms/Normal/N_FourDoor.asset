@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eec463dbab818714595dd9c2d0c5bc34, type: 3}
+  m_Name: N_FourDoor
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 3990116965167838901, guid: 483a8177eef79094b816abf12ed03b10, type: 3}
+  roomSize: {x: 20, y: 20}
+  doors:
+  - direction: 2
+    offset: 0
+  - direction: 3
+    offset: 0
+  - direction: 0
+    offset: 0
+  - direction: 1
+    offset: 0
+  difficultyMin: 0
+  difficultyMax: 4
+  canBeStart: 1
+  isEndRoom: 0

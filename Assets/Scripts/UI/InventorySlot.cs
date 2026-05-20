@@ -1,23 +1,24 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 
-public class InventorySlot : MonoBehaviour
+public class InventorySlot : MonoBehaviour, IPointerClickHandler
 {
-    [SerializeField] private bool IsMoveableSlot;
-
     [SerializeField] private RawImage iconImage;
     [SerializeField] private TextMeshProUGUI quantityText;
 
     private InventoryUI inventoryUI;
     private int slotIndex;
     private InventoryType inventoryType;
+    private bool isMoveable;
 
     public void Init(InventoryUI inventoryUI, int slotIndex, InventoryType inventoryType)
     {
-        this.inventoryUI = inventoryUI;
-        this.slotIndex = slotIndex;
+        this.inventoryUI  = inventoryUI;
+        this.slotIndex    = slotIndex;
         this.inventoryType = inventoryType;
+        isMoveable = inventoryUI != null;
     }
 
     public void SetData(Sprite icon, int quantity)
@@ -25,20 +26,20 @@ public class InventorySlot : MonoBehaviour
         if (icon != null)
         {
             iconImage.texture = icon.texture;
-            iconImage.color = Color.white; // Ensure the icon is visible
+            iconImage.color   = Color.white;
         }
         else
         {
             iconImage.texture = null;
-            iconImage.color = Color.clear; // Hide the icon if there's no item
+            iconImage.color   = Color.clear;
         }
 
-        quantityText.text = quantity > 1 ? quantity.ToString() : string.Empty; // Show quantity only if more than 1
+        quantityText.text = quantity > 1 ? quantity.ToString() : string.Empty;
     }
 
-    private void OnMouseDown()
+    public void OnPointerClick(PointerEventData eventData)
     {
-        if (!IsMoveableSlot) return;
+        if (!isMoveable || inventoryUI == null) return;
         inventoryUI.ToggleMove(slotIndex, inventoryType);
     }
 }

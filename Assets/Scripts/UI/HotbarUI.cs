@@ -12,40 +12,31 @@ public class HotbarUI : MonoBehaviour
     private List<InventorySlot> primaryInventorySlots = new List<InventorySlot>();
 
     private EntityInventory playerInventory;
-    private bool beingDisplayed;
 
-    private void Awake()
+    private void Start()
     {
-        if (gameManager == null)
-        {
-            Debug.LogError("GameManager reference is missing in HotbarUI.");
-        }
+        if (gameManager == null) { Debug.LogError("GameManager reference is missing in HotbarUI."); return; }
 
-        UpdateInventoryReference();
+        playerInventory = gameManager.Player?.GetComponent<EntityInventory>();
+        if (playerInventory == null) { Debug.LogError("Player inventory is null in HotbarUI."); return; }
+
+        InitializePrimarySlots();
+        InitializeListeners();
+        UpdatePrimarySlots();
     }
 
-    private void UpdateInventoryReference()
+    private void InitializePrimarySlots()
     {
-        // Implement
-        if (playerInventory == null && gameManager != null)
+        foreach (Transform child in primaryInventoryParentLeft)
         {
-            playerInventory = gameManager.Player?.GetComponent<EntityInventory>();
-            InitializeListeners();
+            InventorySlot slot = child.GetComponent<InventorySlot>();
+            if (slot != null) primaryInventorySlots.Add(slot);
         }
-    }
-
-    private void UpdatePrimarySlots()
-    {
-        if (!beingDisplayed) return;
-        for (int i = 0; i < primaryInventorySlots.Count; i++)
+        foreach (Transform child in primaryInventoryParentRight)
         {
-            UpdatePrimaryIconAtDisplay(i);
+            InventorySlot slot = child.GetComponent<InventorySlot>();
+            if (slot != null) primaryInventorySlots.Add(slot);
         }
-    }
-
-    private void UpdateActiveSlotSelect()
-    {
-
     }
 
     private void InitializeListeners()
@@ -54,18 +45,25 @@ public class HotbarUI : MonoBehaviour
         playerInventory.SubscribeToInventoryEquippedChange(UpdateActiveSlotSelect);
     }
 
+    private void UpdatePrimarySlots()
+    {
+        for (int i = 0; i < primaryInventorySlots.Count; i++)
+            UpdatePrimaryIconAtDisplay(i);
+    }
+
+    private void UpdateActiveSlotSelect()
+    {
+
+    }
+
     private void UpdatePrimaryIconAtDisplay(int slotIndex)
     {
-        if (!beingDisplayed) return;
-        // Get current content in the slot.
         SlotContent content = playerInventory.GetPrimarySlotContent(slotIndex);
 
-        // Get the item icon and count from content.
         ItemSO itemSO = content.item;
         Sprite itemIcon = itemSO != null ? itemSO.itemIcon : null;
         int quantity = content.quantity;
 
-        // Update the icon and quantity text in the UI.
         primaryInventorySlots[slotIndex].SetData(itemIcon, quantity);
     }
 }

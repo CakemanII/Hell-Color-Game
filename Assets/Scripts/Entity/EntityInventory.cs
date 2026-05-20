@@ -1,13 +1,17 @@
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.VisualScripting.AssemblyQualifiedNameParser;
 using UnityEngine;
 using UnityEngine.Events;
+using System.Collections;
+using UnityEditor.Build;
 
 public class SlotContent
 {
     public ItemSO item; // Will convert to gameobject
+    public GameObject essentialItemReference;
     public int quantity;
 }
 
@@ -22,13 +26,17 @@ public class EntityInventory : MonoBehaviour
     [SerializeField] private int maxPrimaryInventorySlots = 8;
     public int MaxPrimaryInventorySlots => maxPrimaryInventorySlots;
     [SerializeField] private int maxSecondaryInventorySlots = 30;
+    [Space()]
+    [SerializeField] private ItemSO mediumAmmo;
+    [SerializeField] private ItemSO heavyAmmo;
+
     public int MaxSecondaryInventorySlots => maxSecondaryInventorySlots;
 
     private List<SlotContent> primaryInventorySlots = new List<SlotContent>();
     private List<SlotContent> secondaryInventorySlots = new List<SlotContent>();
 
     // This is used to store content that is being moved around, EX: When the mouse picks something up.
-    private SlotContent floatingSlotContent;
+    private SlotContent floatingSlotContent = new SlotContent { item = null, quantity = 0 };
 
     private UnityEvent onInventoryEquippedChangeSubscribers = new UnityEvent();
     private UnityEvent onInventoryChangeSubscribers = new UnityEvent();
@@ -39,6 +47,22 @@ public class EntityInventory : MonoBehaviour
     public int GetActivePrimarySlotIndex() { return activeSlotIndex; }
     public int GetPreviousPrimarySlotIndex() { return (activeSlotIndex - 1 + primaryInventorySlots.Count) % primaryInventorySlots.Count; }
     public int GetNextPrimarySlotIndex() { return (activeSlotIndex + 1) % primaryInventorySlots.Count; }
+
+
+    public int CurrentHeavyAmmo { private set; get; }
+    public int CurrentMediumAmmo { private set; get; }
+
+
+    public void Init(int primaryInventorySlotAmount, int secondaryInventorySlotAmount)
+    {
+        SetInventorySlotsAmount(primaryInventorySlotAmount, InventoryType.Primary);
+        SetInventorySlotsAmount(secondaryInventorySlotAmount, InventoryType.Secondary);
+    }
+
+    private void Awake()
+    {
+        SubscribeToInventoryChange(CountAmmos);
+    }
 
     public void SetActivePrimarySlot(int slotIndex)
     {
@@ -53,13 +77,18 @@ public class EntityInventory : MonoBehaviour
         activeSlotIndex = slotIndex;
 
         // Invoke the change equipped item event
-        if (changedEquippedItem) onInventoryEquippedChangeSubscribers.Invoke();
+        if (changedEquippedItem) InvokeBothInventoryEvents();
     }
     #endregion
 
-    private void DropItem(ItemSO item, int amount)
+    private void Start()
     {
+        Init(maxPrimaryInventorySlots, maxSecondaryInventorySlots);
+    }
 
+    private void DropItem(ItemSO item, int amount, GameObject essentialItemReference)
+    {
+        CollectablesManager.Instance.SpawnCollectable(item, amount, essentialItemReference, transform.position, transform.Find("CameraPosition").transform.rotation);
     }
 
     #region Essential Inventory Functions
@@ -83,7 +112,7 @@ public class EntityInventory : MonoBehaviour
         // Add slots if increasing the amount, remove slots if decreasing the amount
         if (amount > inventorySlotsAmount)
        {
-            for (int _ = 0; _ < inventorySlotsAmount - amount; _++)
+            for (int _ = 0; _ < amount - inventorySlotsAmount; _++)
                 currentInventorySlots.Add(new SlotContent { item = null, quantity = 0 });
        }
        else
@@ -101,16 +130,16 @@ public class EntityInventory : MonoBehaviour
             {
                 if (removedSlot.item != null)
                 {
-                    int amountRemaining = AttemptAddToBothInventory(removedSlot.item, removedSlot.quantity, inventoryType).quantity;
+                    int amountRemaining = AttemptAddToBothInventory(removedSlot, inventoryType).quantity;
                     if (amountRemaining > 0)
                     {
-                        DropItem(removedSlot.item, amountRemaining);
+                        DropItem(removedSlot.item, amountRemaining, removedSlot.essentialItemReference);
                     }
                 }
             }
        }
-
-        onInventoryChangeSubscribers.Invoke();
+        
+       InvokeBothInventoryEvents();
     }
 
     /// <summary>
@@ -118,19 +147,19 @@ public class EntityInventory : MonoBehaviour
     /// Stacks if autoStack is enabled and there are existing stacks of the same item.
     /// Returns a number of remaining items.
     /// </summary>
-    private SlotContent AppendItemToAvailableSlot(ItemSO item, int amount, bool stackInExistingStacks, InventoryType inventoryType)
+    private SlotContent AppendItemToAvailableSlot(SlotContent slotContent, bool stackInExistingStacks, InventoryType inventoryType)
     {
         // Stop if item or amount is invalid
-        if (item == null || amount <= 0) return new SlotContent() {item=item, quantity=amount};
+        if (slotContent.item == null || slotContent.quantity <= 0) return slotContent;
 
         // Get the inventory slots and amount based on the inventory type
         List<SlotContent> currentInventorySlots = inventoryType == InventoryType.Primary ? primaryInventorySlots : this.secondaryInventorySlots; // Linked List
         int currentInventorySlotsAmount = currentInventorySlots.Count;
 
         // Stop if secondary inventory is not enabled or has no slots
-        if (currentInventorySlotsAmount == 0) return new SlotContent() { item = item, quantity = amount }; ;
+        if (currentInventorySlotsAmount == 0) return slotContent;
 
-        int amountRemaining = amount;
+        int amountRemaining = slotContent.quantity;
 
         // If autoStack is enabled, try to stack the item in existing stacks first
         if (stackInExistingStacks)
@@ -138,9 +167,9 @@ public class EntityInventory : MonoBehaviour
             // Iterate through each slot, and see if it can stack the item.
             for (int i = 0; i < currentInventorySlotsAmount; i++)
             {
-                if (currentInventorySlots[i].item == item && currentInventorySlots[i].quantity < item.maxStackSize)
+                if (currentInventorySlots[i].item == slotContent.item && currentInventorySlots[i].quantity < slotContent.item.maxStackSize)
                 {
-                    int amountCanBeAddedToStack = item.maxStackSize - currentInventorySlots[i].quantity;
+                    int amountCanBeAddedToStack = slotContent.item.maxStackSize - currentInventorySlots[i].quantity;
                     int amountToAddToStack = Mathf.Min(amountRemaining, amountCanBeAddedToStack);
                     currentInventorySlots[i].quantity += amountToAddToStack;
                     amountRemaining -= amountToAddToStack;
@@ -149,7 +178,7 @@ public class EntityInventory : MonoBehaviour
                 }
             }
         }
-        
+
         while (amountRemaining > 0)
         {
             // Check if there is room in the inventory
@@ -159,16 +188,16 @@ public class EntityInventory : MonoBehaviour
             if (firstAvailableSlotIndex == null) break;
 
             // Add the item to the first available slot
-            currentInventorySlots[firstAvailableSlotIndex.Value].item = item;
+            currentInventorySlots[firstAvailableSlotIndex.Value].item = slotContent.item;
 
             // Calculate the amount to add to this slot (either the remaining amount or the max stack size, whichever is smaller)
-            int amountToAdd = Mathf.Min(amountRemaining, item.maxStackSize);
+            int amountToAdd = Mathf.Min(amountRemaining, slotContent.item.maxStackSize);
             currentInventorySlots[firstAvailableSlotIndex.Value].quantity = amountToAdd;
             amountRemaining = Mathf.Max(0, amountRemaining - amountToAdd);
         }
 
-        if (amountRemaining != amount) onInventoryChangeSubscribers.Invoke();
-        return new SlotContent() { item = item, quantity = 0 };
+        if (amountRemaining != slotContent.quantity) InvokeBothInventoryEvents();
+        return new SlotContent() { item = slotContent.item, quantity = amountRemaining, essentialItemReference = slotContent.essentialItemReference };
     }
 
     /// <summary>
@@ -193,32 +222,34 @@ public class EntityInventory : MonoBehaviour
     /// Sets the item of an inventory slot directly, replacing the existing item and quantity. Completely removing it.
     /// Returns amount of item remaining (if obeying the stacking limimt) or 0 if all items were added to the slot.
     /// </summary>
-    private SlotContent SetItemInSlot(ItemSO item, int amount, int slotIndex, bool ignoreStackingLimit, InventoryType inventoryType)
+    private SlotContent SetItemInSlot(SlotContent slotContent, int slotIndex, bool ignoreStackingLimit, InventoryType inventoryType)
     {
         // Stop if item or amount is invalid
-        if (amount < 0) return new SlotContent() { item = item, quantity = amount };
+        if (slotContent.quantity < 0) return slotContent;
 
         // Get the inventory slots and amount based on the inventory type
         List<SlotContent> currentInventorySlots = inventoryType == InventoryType.Primary ? primaryInventorySlots : this.secondaryInventorySlots; // Linked List
         int currentInventorySlotsAmount = currentInventorySlots.Count;
 
         // Stop if secondary inventory is not enabled or has no slots
-        if (currentInventorySlotsAmount == 0) return new SlotContent() { item = item, quantity = amount };
+        if (currentInventorySlotsAmount == 0) return slotContent;
 
         // Stop if slot index is out of range
-        if (slotIndex < 0 || slotIndex >= currentInventorySlotsAmount) return new SlotContent() { item = item, quantity = amount };
+        if (slotIndex < 0 || slotIndex >= currentInventorySlotsAmount) return slotContent;
 
         // Set the item and quantity in the specified slot
-        currentInventorySlots[slotIndex].item = item;
+        currentInventorySlots[slotIndex].item = slotContent.item;
 
-        int amountToAdd = ignoreStackingLimit ? amount : Mathf.Min(amount, item.maxStackSize);
+        int amountToAdd = (ignoreStackingLimit || slotContent.item == null)
+            ? slotContent.quantity
+            : Mathf.Min(slotContent.quantity, slotContent.item.maxStackSize);
         currentInventorySlots[slotIndex].quantity = amountToAdd;
 
         // Return any remaining items that couldn't fit in the slot
-        onInventoryChangeSubscribers.Invoke();
-        return new SlotContent() { item = item, quantity = amount - amountToAdd };
+        InvokeBothInventoryEvents();
+        return new SlotContent() { item = slotContent.item, quantity = slotContent.quantity - amountToAdd, essentialItemReference = slotContent.essentialItemReference };
     }
-    
+
     /// <summary>
     /// Clear the item of an inventory slot, replacing the existing item and quantity with null and 0. Completely removing it.
     /// Returns the item contents that it removed.
@@ -238,14 +269,15 @@ public class EntityInventory : MonoBehaviour
         // Store the item and quantity that was in the slot before clearing it
         ItemSO removedItem = currentInventorySlots[slotIndex].item;
         int removedQuantity = currentInventorySlots[slotIndex].quantity;
+        GameObject essentialItemReference = currentInventorySlots[slotIndex].essentialItemReference;
 
         // Clear the item and quantity in the specified slot
         currentInventorySlots[slotIndex].item = null;
         currentInventorySlots[slotIndex].quantity = 0;
 
         // Return the item and quantity that was removed from the slot
-        onInventoryChangeSubscribers.Invoke();
-        return new SlotContent() { item = removedItem, quantity = removedQuantity };
+        InvokeBothInventoryEvents();
+        return new SlotContent() { item = removedItem, quantity = removedQuantity, essentialItemReference = essentialItemReference };
     }
 
     /// <summary>
@@ -253,9 +285,11 @@ public class EntityInventory : MonoBehaviour
     /// </summary>
     private SlotContent GetSlotContents(InventoryType inventoryType, int slotIndex)
     {
-        return inventoryType == InventoryType.Primary ? primaryInventorySlots[slotIndex] : secondaryInventorySlots[slotIndex];
+        List<SlotContent> slots = inventoryType == InventoryType.Primary ? primaryInventorySlots : secondaryInventorySlots;
+        if (slotIndex < 0 || slotIndex >= slots.Count) return new SlotContent { item = null, quantity = 0 };
+        return slots[slotIndex];
     }
-    
+
     /// <summary>
     /// Returns the size of an inventory.
     /// </summary>
@@ -263,7 +297,7 @@ public class EntityInventory : MonoBehaviour
     {
         return inventoryType == InventoryType.Primary ? primaryInventorySlots.Count : secondaryInventorySlots.Count;
     }
-    
+
     /// <summary>
     /// Searches an inventory for a specific item and returns a list of indexes and a total quantity.
     /// </summary>
@@ -291,32 +325,32 @@ public class EntityInventory : MonoBehaviour
     /// <summary>
     /// Insert an item to a specific slot, stacking the item if the slot already contains the same item and stacking is allowed. Returns the amount of item that couldn't be added to the slot.
     /// </summary>
-    private SlotContent InsertItemSlotWithStacking(ItemSO item, int amount, int slotIndex, InventoryType inventoryType)
+    private SlotContent InsertItemSlotWithStacking(SlotContent slotContent, int slotIndex, InventoryType inventoryType)
     {
         // Stop if item or amount is invalid
-        if (item == null || amount <= 0) return new SlotContent() { item = item, quantity = amount };
+        if (slotContent.item == null || slotContent.quantity <= 0) return slotContent;
 
         // Get the inventory slots and amount based on the inventory type
         List<SlotContent> currentInventorySlots = inventoryType == InventoryType.Primary ? primaryInventorySlots : secondaryInventorySlots; // Linked List
 
         // Stop if secondary inventory is not enabled or has no slots
-        if (currentInventorySlots.Count == 0) return new SlotContent() { item = item, quantity = amount };
+        if (currentInventorySlots.Count == 0) return slotContent;
 
         // Stop if slot index is out of range
-        if (slotIndex < 0 || slotIndex >= currentInventorySlots.Count) return new SlotContent() { item = item, quantity = amount };
+        if (slotIndex < 0 || slotIndex >= currentInventorySlots.Count) return slotContent;
 
         // If the slot already contains the same item, try to stack it. Otherwise, do not stack.
-        if (currentInventorySlots[slotIndex].item == item)
+        if (currentInventorySlots[slotIndex].item == slotContent.item)
         {
-            int amountCanBeAddedToStack = item.maxStackSize - currentInventorySlots[slotIndex].quantity;
-            int amountToAddToStack = Mathf.Min(amount, amountCanBeAddedToStack);
+            int amountCanBeAddedToStack = slotContent.item.maxStackSize - currentInventorySlots[slotIndex].quantity;
+            int amountToAddToStack = Mathf.Min(slotContent.quantity, amountCanBeAddedToStack);
             currentInventorySlots[slotIndex].quantity += amountToAddToStack;
-            onInventoryChangeSubscribers.Invoke();
-            return new SlotContent() { item = item, quantity = amount - amountToAddToStack };
+            InvokeBothInventoryEvents();
+            return new SlotContent() { item = slotContent.item, quantity = slotContent.quantity - amountToAddToStack, essentialItemReference = slotContent.essentialItemReference };
         }
         else
         {
-            return new SlotContent() { item = item, quantity = amount };
+            return slotContent;
         }
     }
 
@@ -324,47 +358,49 @@ public class EntityInventory : MonoBehaviour
     /// Swap an item in a specific slot, replacing the existing item and quantity with the new item and quantity. Returns the item and quantity that was in the slot before the swap.
     /// This will obey stacking limits, and will not swap a stack that is more than full with an item.
     /// </summary>
-    private SlotContent SwapItemInSlot(ItemSO item, int amount, int slotIndex, InventoryType inventoryType)
+    private SlotContent SwapItemInSlot(SlotContent slotContent, int slotIndex, InventoryType inventoryType)
     {
         // Stop if amount is invalid
-        if (amount < 0) return new SlotContent() { item = item, quantity = amount };
+        if (slotContent.quantity < 0) return slotContent;
 
         // Get the inventory slots and amount based on the inventory type
         List<SlotContent> currentInventorySlots = inventoryType == InventoryType.Primary ? primaryInventorySlots : this.secondaryInventorySlots; // Linked List
 
         // Stop if secondary inventory is not enabled or has no slots
-        if (currentInventorySlots.Count == 0) return new SlotContent() { item = item, quantity = amount };
+        if (currentInventorySlots.Count == 0) return slotContent;
 
         // Stop if the new item's quantity exceeds the stacking limit of the item in the slot (if they are the same item), and do not swap if that is the case.
-        if (currentInventorySlots[slotIndex].item == item && amount > item.maxStackSize) return new SlotContent() { item = item, quantity = amount };
+        if (slotContent.item != null && currentInventorySlots[slotIndex].item == slotContent.item && slotContent.quantity > slotContent.item.maxStackSize) return slotContent;
 
         // Stop if slot index is out of range
-        if (slotIndex < 0 || slotIndex >= currentInventorySlots.Count) return new SlotContent() { item = item, quantity = amount };
+        if (slotIndex < 0 || slotIndex >= currentInventorySlots.Count) return slotContent;
 
         // Store the item and quantity that was in the slot before swapping it
         ItemSO removedItem = currentInventorySlots[slotIndex].item;
         int removedQuantity = currentInventorySlots[slotIndex].quantity;
+        GameObject essentialItemReference = currentInventorySlots[slotIndex].essentialItemReference;
 
         // Set the new item and quantity in the specified slot
-        currentInventorySlots[slotIndex].item = item;
-        currentInventorySlots[slotIndex].quantity = amount;
+        currentInventorySlots[slotIndex].item = slotContent.item;
+        currentInventorySlots[slotIndex].quantity = slotContent.quantity;
+        currentInventorySlots[slotIndex].essentialItemReference = slotContent.essentialItemReference;
 
         // Return the item and quantity that was removed from the slot
-        onInventoryChangeSubscribers.Invoke();
-        return new SlotContent() { item = removedItem, quantity = removedQuantity };
+        InvokeBothInventoryEvents();
+        return new SlotContent() { item = removedItem, quantity = removedQuantity, essentialItemReference = essentialItemReference };
     }
-    
+
     /// <summary>
     /// Appends an item to the inventory, first checking the primary inventory, then the secondary inventory.
     /// Returns the item and amount that couldn't be added to either inventory.
     /// </summary>
-    private SlotContent AttemptAddToBothInventory(ItemSO item, int amount, InventoryType firstInventory)
+    private SlotContent AttemptAddToBothInventory(SlotContent slotContent, InventoryType firstInventory)
     {
         // First check and add to the primary inventory.
-        int amountRemainingAfterFirst = AppendItemToAvailableSlot(item, amount, true, firstInventory).quantity;
+        SlotContent remaining = AppendItemToAvailableSlot(slotContent, true, firstInventory);
 
         // If there is any amount remaining, check and add to the secondary inventory.
-        return AppendItemToAvailableSlot(item, amountRemainingAfterFirst, true,
+        return AppendItemToAvailableSlot(remaining, true,
             firstInventory == InventoryType.Primary ? InventoryType.Secondary : InventoryType.Primary
         );
     }
@@ -376,34 +412,40 @@ public class EntityInventory : MonoBehaviour
     public void SetSecondaryInventorySlotsAmount(int amount)
     { SetInventorySlotsAmount(amount, InventoryType.Secondary); }
 
-    public void AppendItemToPrimaryInventory(ItemSO item, int amount)
-    { AttemptAddToBothInventory(item, amount, InventoryType.Primary); }
-    public void AppendItemToSecondaryInventory(ItemSO item, int amount)
-    { AttemptAddToBothInventory(item, amount, InventoryType.Secondary); }
+    public SlotContent AppendItemToPrimaryInventory(SlotContent slotContent, bool dropExtra = true)
+    { SlotContent extra = AttemptAddToBothInventory(slotContent, InventoryType.Primary); if (dropExtra) DropItem(extra.item, extra.quantity, extra.essentialItemReference); else return extra; return null; }
+    public SlotContent AppendItemToSecondaryInventory(SlotContent slotContent, bool dropExtra = true)
+    { SlotContent extra = AttemptAddToBothInventory(slotContent, InventoryType.Secondary); if (dropExtra) DropItem(extra.item, extra.quantity, extra.essentialItemReference); else return extra; return null; }
 
-    public void OverrideSetItemAtIndexPrimaryInventory(ItemSO item, int amount, int slotIndex, bool ignoreStackingLimit = false)
-    { SetItemInSlot(item, amount, slotIndex, ignoreStackingLimit, InventoryType.Primary); }
-    public void OverrideSetItemAtIndexSecondaryInventory(ItemSO item, int amount, int slotIndex, bool ignoreStackingLimit = false)
-    { SetItemInSlot(item, amount, slotIndex, ignoreStackingLimit, InventoryType.Secondary); }
+    public void OverrideSetItemAtIndexPrimaryInventory(SlotContent slotContent, int slotIndex, bool ignoreStackingLimit = false)
+    { SetItemInSlot(slotContent, slotIndex, ignoreStackingLimit, InventoryType.Primary); }
+    public void OverrideSetItemAtIndexSecondaryInventory(SlotContent slotContent, int slotIndex, bool ignoreStackingLimit = false)
+    { SetItemInSlot(slotContent, slotIndex, ignoreStackingLimit, InventoryType.Secondary); }
 
     public void ClearItemAtIndexPrimaryInventory(int slotIndex)
     { ClearItemInSlot(slotIndex, InventoryType.Primary); }
     public void ClearItemAtIndexSecondaryInventory(int slotIndex)
     { ClearItemInSlot(slotIndex, InventoryType.Secondary); }
 
-    public void InsertItemAtIndexWithStackingPrimaryInventory(ItemSO item, int amount, int slotIndex)
-    { InsertItemSlotWithStacking(item, amount, slotIndex, InventoryType.Primary); }
-    public void InsertItemAtIndexWithStackingSecondaryInventory(ItemSO item, int amount, int slotIndex)
-    { InsertItemSlotWithStacking(item, amount, slotIndex, InventoryType.Secondary); }
+    public void InsertItemAtIndexWithStackingPrimaryInventory(SlotContent slotContent, int slotIndex)
+    { InsertItemSlotWithStacking(slotContent, slotIndex, InventoryType.Primary); }
+    public void InsertItemAtIndexWithStackingSecondaryInventory(SlotContent slotContent, int slotIndex)
+    { InsertItemSlotWithStacking(slotContent, slotIndex, InventoryType.Secondary); }
 
-    public void SwapItemAtIndexPrimaryInventory(ItemSO item, int amount, int slotIndex)
-    { SwapItemInSlot(item, amount, slotIndex, InventoryType.Primary); }
-    public void SwapItemAtIndexSecondaryInventory(ItemSO item, int amount, int slotIndex)
-    { SwapItemInSlot(item, amount, slotIndex, InventoryType.Secondary); }
+    public void SwapItemAtIndexPrimaryInventory(SlotContent slotContent, int slotIndex)
+    { SwapItemInSlot(slotContent, slotIndex, InventoryType.Primary); }
+    public void SwapItemAtIndexSecondaryInventory(SlotContent slotContent, int slotIndex)
+    { SwapItemInSlot(slotContent, slotIndex, InventoryType.Secondary); }
 
     public SlotContent GetActivePrimarySlotContent()
     {
         return GetSlotContents(InventoryType.Primary, activeSlotIndex);
+    }
+
+    public void SetEssentialReferenceAtPrimarySlot(int slotIndex, GameObject reference)
+    {
+        if (slotIndex < 0 || slotIndex >= primaryInventorySlots.Count) return;
+        primaryInventorySlots[slotIndex].essentialItemReference = reference;
     }
     public SlotContent GetPrimarySlotContent(int activeSlotIndex)
     {
@@ -417,7 +459,7 @@ public class EntityInventory : MonoBehaviour
     /// <summary>
     /// Searches for an item in both inventories, first checking the primary inventory, then the secondary inventory. Returns a list of indexes and a total quantity.
     /// </summary>
-    public (List<int>, int) FindItemInBothInventories(ItemSO item)
+    public (List<int>, List<int>, int) FindItemInBothInventories(ItemSO item)
     {
         // First check the primary inventory.
         (List<int> primaryIndexes, int primaryTotalQuantity) = FindItemInInventory(item, InventoryType.Primary);
@@ -426,12 +468,46 @@ public class EntityInventory : MonoBehaviour
         (List<int> secondaryIndexes, int secondaryTotalQuantity) = FindItemInInventory(item, InventoryType.Secondary);
 
         // Combine the results and return them.
-        List<int> combinedIndexes = new List<int>();
-        combinedIndexes.AddRange(primaryIndexes);
-        combinedIndexes.AddRange(secondaryIndexes);
         int combinedTotalQuantity = primaryTotalQuantity + secondaryTotalQuantity;
 
-        return (combinedIndexes, combinedTotalQuantity);
+        return (primaryIndexes, secondaryIndexes, combinedTotalQuantity);
+    }
+
+    public void DecrementItemFromActiveSlot()
+    {
+        SlotContent activeSlotContent = GetActivePrimarySlotContent();
+        if (activeSlotContent.item == null || activeSlotContent.quantity <= 0) return;
+
+        SlotContent newSlotContent = new SlotContent() { item = activeSlotContent.item, quantity = activeSlotContent.quantity - 1, essentialItemReference = activeSlotContent.essentialItemReference };
+        OverrideSetItemAtIndexPrimaryInventory(newSlotContent, activeSlotIndex);
+    }
+
+    public SlotContent TakeItemFromBothInventories(ItemSO item, int quantity)
+    {
+        (List<int>, List<int>, int) results = FindItemInBothInventories(item);
+        List<int> primaryIndexes = results.Item1;
+        List<int> secondaryIndexes = results.Item2;
+        int totalQuantity = results.Item3;
+
+        int quantityAvailableToTake = Mathf.Min(quantity, totalQuantity);
+        int quantityRemaining = quantityAvailableToTake;
+
+        foreach (InventoryType inventoryType in new InventoryType[] { InventoryType.Primary, InventoryType.Secondary })
+        {
+            foreach (int index in (inventoryType == InventoryType.Primary ? primaryIndexes : secondaryIndexes))
+            {
+                SlotContent slotContent = GetSlotContents(inventoryType, index);
+                int quantityToTakeFromSlot = Mathf.Min(slotContent.quantity, quantityRemaining);
+                SlotContent newSlotContent = new SlotContent() { item = slotContent.item, quantity = slotContent.quantity - quantityToTakeFromSlot, essentialItemReference = slotContent.essentialItemReference };
+                if (inventoryType == InventoryType.Primary)
+                     OverrideSetItemAtIndexPrimaryInventory(newSlotContent, index);
+                else
+                    OverrideSetItemAtIndexSecondaryInventory(newSlotContent, index);
+                quantityRemaining -= quantityToTakeFromSlot;
+            }
+        }
+
+        return new SlotContent() { item = item, quantity = quantityAvailableToTake - quantityRemaining, essentialItemReference = null };
     }
     #endregion
 
@@ -447,7 +523,7 @@ public class EntityInventory : MonoBehaviour
     /// Will not override current floating slot content, unless autoDrop is enabled, in which it will drop the current floating slot content and set the new floating slot content.
     /// Returns true if successful, false if the floating slot already has content and autoDrop is not enabled.
     /// </summary>
-    public bool SetInventoryFloatingSlot(ItemSO item, int amount, bool autoDrop)
+    public bool SetInventoryFloatingSlot(SlotContent slotContent, bool autoDrop)
     {
         SlotContent currentSlot = GetFloatingSlotContents();
         if (currentSlot.item != null && currentSlot.quantity > 0)
@@ -458,25 +534,29 @@ public class EntityInventory : MonoBehaviour
                 return false;
         }
 
-        floatingSlotContent = new SlotContent() { item = item, quantity = amount };
+        floatingSlotContent = new SlotContent() { item = slotContent.item, quantity = slotContent.quantity, essentialItemReference = slotContent.essentialItemReference };
+        onInventoryFloatingSlotChangeSubscribers.Invoke();
         return true;
     }
-    
+
     /// <summary>
     /// Drop current floating slot content and clear the floating slot.
     /// </summary>
     public void DropInventoryFloatingSlot()
     {
         SlotContent currentSlot = GetFloatingSlotContents();
-        DropItem(currentSlot.item, currentSlot.quantity);
+        DropItem(currentSlot.item, currentSlot.quantity, currentSlot.essentialItemReference);
         ClearInventoryFloatingSlot();
     }
-    
+
     /// <summary>
     /// Clear the floating slot, erasing content if there is any.
     /// </summary>
     private void ClearInventoryFloatingSlot()
-    { floatingSlotContent = new SlotContent() { item = null, quantity = 0 }; }
+    {
+        floatingSlotContent = new SlotContent() { item = null, quantity = 0 };
+        onInventoryFloatingSlotChangeSubscribers.Invoke();
+    }
     #endregion
 
     #region Main Inventory Floating Slot Functions
@@ -490,17 +570,17 @@ public class EntityInventory : MonoBehaviour
         if (slotContent == null) return;
 
         // Get floating slot contents
-        SlotContent floatingSlotContent = GetFloatingSlotContents();
-        if (slotContent == null) return;
+        SlotContent currentFloatingSlotContent = GetFloatingSlotContents();
+        if (currentFloatingSlotContent == null) return;
 
         // If there is already content in the floating slot, ensure it does not exceed stack size.
         if (slotContent.item && slotContent.quantity > slotContent.item.maxStackSize) return;
 
         // Swap the contents of the floating slot and the inventory slot
-        SlotContent newFloatingSlotContent = SwapItemInSlot(floatingSlotContent.item, floatingSlotContent.quantity, slotIndex, inventoryType);
-        this.floatingSlotContent = newFloatingSlotContent;
+        SlotContent newFloatingSlotContent = SwapItemInSlot(currentFloatingSlotContent, slotIndex, inventoryType);
+        floatingSlotContent = newFloatingSlotContent;
 
-        if (floatingSlotContent != newFloatingSlotContent) onInventoryFloatingSlotChangeSubscribers.Invoke();
+        if (currentFloatingSlotContent != newFloatingSlotContent) onInventoryFloatingSlotChangeSubscribers.Invoke();
     }
 
     public void SwapFloatingContentsAndPrimaryInventorySlot(int slotIndex)
@@ -508,6 +588,12 @@ public class EntityInventory : MonoBehaviour
     public void SwapFloatingContentsAndSecondaryInventorySlot(int slotIndex)
     { SwapFloatingContentsAndInventorySlot(slotIndex, InventoryType.Secondary); }
     #endregion
+
+    private void InvokeBothInventoryEvents()
+    {
+        onInventoryChangeSubscribers.Invoke();
+        onInventoryEquippedChangeSubscribers.Invoke();
+    }
 
     public void SubscribeToInventoryEquippedChange(UnityAction listener)
     { onInventoryEquippedChangeSubscribers.AddListener(listener); }
@@ -523,4 +609,12 @@ public class EntityInventory : MonoBehaviour
     { onInventoryFloatingSlotChangeSubscribers.AddListener(listener); }
     public void UnsubscribeToInventoryFloatingSlotChange(UnityAction listener)
     { onInventoryFloatingSlotChangeSubscribers.RemoveListener(listener); }
+
+
+    private void CountAmmos()
+    {
+        // Count Medium Ammo
+        CurrentMediumAmmo = FindItemInBothInventories(mediumAmmo).Item3;
+        CurrentHeavyAmmo = FindItemInBothInventories(heavyAmmo).Item3;
+    }
 }

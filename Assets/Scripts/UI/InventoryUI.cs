@@ -23,16 +23,16 @@ public class InventoryUI : MonoBehaviour
     private List<InventorySlot> primaryInventorySlots = new List<InventorySlot>();
     private List<InventorySlot> secondaryInventorySlots = new List<InventorySlot>();
 
-    private bool beingDisplayed;
-
-    private void Awake()
+    private void Start()
     {
-        if (gameManager == null)
-        {
-            Debug.LogError("GameManager reference is missing in InventoryUI.");
-        }
+        if (gameManager == null) { Debug.LogError("GameManager reference is missing in InventoryUI."); return; }
+
+        playerInventory = GameManager.Instance.Player?.GetComponent<EntityInventory>();
+        if (playerInventory == null) { Debug.LogError("Player inventory is null in InventoryUI."); return; }
 
         InitializeInventoryUI();
+        InitializeListeners();
+        UpdateAllInventorySlots();
     }
 
     private void InitializeInventoryUI()
@@ -44,10 +44,10 @@ public class InventoryUI : MonoBehaviour
             inventorySlot.Init(this, i, InventoryType.Primary);
             primaryInventorySlots.Add(inventorySlot); 
         }
-        for (int i = 0; i < Mathf.Min(4, Mathf.Max(4, playerInventory.MaxPrimaryInventorySlots - 4)); i++ ) 
+        for (int i = 0; i < Mathf.Min(4, Mathf.Max(4, playerInventory.MaxPrimaryInventorySlots - 4)); i++ )
         {
             InventorySlot inventorySlot = Instantiate(inventoryIconPrefab, primaryInventoryParentRight).GetComponent<InventorySlot>();
-            inventorySlot.Init(this, i, InventoryType.Primary);
+            inventorySlot.Init(this, i + 4, InventoryType.Primary);
             primaryInventorySlots.Add(inventorySlot);
         }
 
@@ -62,7 +62,6 @@ public class InventoryUI : MonoBehaviour
 
     public void UpdateAllInventorySlots()
     {
-        if (!beingDisplayed) return;
         for (int i = 0; i < primaryInventorySlots.Count; i++)
         {
             UpdateInventoryIconAtDisplay(i, InventoryType.Primary);
@@ -76,7 +75,6 @@ public class InventoryUI : MonoBehaviour
 
     public void UpdateFloatingInventorySlot()
     {
-        if (!beingDisplayed) return;
         SlotContent floatingSlotContent = playerInventory.GetFloatingSlotContents();
         floatingInventorySlot.SetData(
             floatingSlotContent.item != null ? floatingSlotContent.item.itemIcon : null, 
@@ -86,7 +84,6 @@ public class InventoryUI : MonoBehaviour
 
     private void UpdateInventoryIconAtDisplay(int slotIndex, InventoryType inventoryType)
     {
-        if (!beingDisplayed) return;
         // Get current content in the slot.
         SlotContent content = inventoryType == InventoryType.Primary ? 
             playerInventory.GetPrimarySlotContent(slotIndex) : playerInventory.GetSecondarySlotContent(slotIndex);
@@ -105,22 +102,7 @@ public class InventoryUI : MonoBehaviour
 
     private void Update()
     {
-        // Update the reference
-        UpdateInventoryReference();
-
-        // Update the position of the floating slot to follow the mouse cursor
-        if (beingDisplayed)
-            floatingSlot.position = Input.mousePosition;
-    }
-
-    private void UpdateInventoryReference()
-    {
-        // Implement
-        if (playerInventory == null && gameManager != null)
-        {
-            playerInventory = gameManager.Player?.GetComponent<EntityInventory>();
-            InitializeListeners();
-        }
+        floatingSlot.position = Input.mousePosition;
     }
 
     private void InitializeListeners()

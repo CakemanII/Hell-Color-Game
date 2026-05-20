@@ -1,63 +1,127 @@
 using UnityEngine;
 
+public enum TypeEquipped
+{
+    None,
+    LoadableWeapon,
+    StackableItem,
+    Misc
+}
+
 public class EntityPrimaryEquippedHandler : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] EntityInventory entityInventory;
-    [SerializeField] Transform equippedItemParent; // Parent transform for equipped items (optional)
+    [SerializeField] Transform equippedItemParent;
+    [SerializeField] LayerMask equippedItemLayer;
+
+    public EntityInventory GetEntityInventory() => entityInventory;
 
     private GameObject currentlyEquippedObject;
+    private TypeEquipped typeEquipped;
+    private int previousSlotIndex;
+    private ItemSO previousEquippedItem;
 
-    public GameObject GetEquippedObject() {  return currentlyEquippedObject; }
+    public TypeEquipped GetTypeEquipped() => typeEquipped;
+    public GameObject GetEquippedObject() => currentlyEquippedObject;
+    public Item GetEquippedObjectItem() => currentlyEquippedObject?.GetComponent<Item>();
 
     void Awake()
     {
-        // Subscribe to the entity inventory equipped change event
         entityInventory.SubscribeToInventoryEquippedChange(OnEquippedItemChange);
     }
 
     private void OnEquippedItemChange()
     {
-        Debug.Log("Swithcing equipped item in EntityPrimaryEquippedHandler");
-
-        // Get the currently equipped item from the inventory
+        int currentSlotIndex = entityInventory.GetActivePrimarySlotIndex();
         SlotContent activeSlot = entityInventory.GetActivePrimarySlotContent();
 
-        // Destroy current equipped item if exists
-        Destroy(currentlyEquippedObject);
+        if (currentSlotIndex == previousSlotIndex && activeSlot.item == previousEquippedItem) return;
 
-        // Instantiate the new equipped item if it exists
+        UnequipCurrentItem();
+
+        currentlyEquippedObject = null;
+
         if (activeSlot.item != null)
-        {
-            // Instantiate the equipped item prefab as a child of this GameObject
-            currentlyEquippedObject = Instantiate(activeSlot.item.itemEquipedPrefab, transform);
+            EquipItem(activeSlot);
 
-            // Set the parent of the object to the equipped item parent if it exists
-            if (equippedItemParent != null)
-            {
-                currentlyEquippedObject.transform.SetParent(equippedItemParent, false);
-                currentlyEquippedObject.transform.localPosition = Vector3.zero; // Reset local position
-                currentlyEquippedObject.transform.localRotation = Quaternion.identity; // Reset local rotation
-                SetLayerOfEquippedObject();
-            }
+        SetEquippedType(activeSlot);
+        previousSlotIndex = currentSlotIndex;
+        previousEquippedItem = activeSlot.item;
+    }
+
+    private void UnequipCurrentItem()
+    {
+        if (currentlyEquippedObject == null) return;
+
+        if (typeEquipped == TypeEquipped.LoadableWeapon)
+        {
+            // Write the live weapon object back into the old slot so it can be re-equipped later
+            entityInventory.SetEssentialReferenceAtPrimarySlot(previousSlotIndex, currentlyEquippedObject);
+            CollectablesManager.Instance.WeaponPool.Give(currentlyEquippedObject);
         }
+        else
+        {
+            Destroy(currentlyEquippedObject);
+        }
+    }
+
+    private void EquipItem(SlotContent activeSlot)
+    {
+        if (activeSlot.essentialItemReference != null)
+        {
+            CollectablesManager.Instance.WeaponPool.Take(activeSlot.essentialItemReference);
+            currentlyEquippedObject = activeSlot.essentialItemReference;
+            currentlyEquippedObject.SetActive(true);
+        }
+        else
+        {
+            currentlyEquippedObject = Instantiate(activeSlot.item.itemEquipedPrefab, transform);
+        }
+
+        if (equippedItemParent != null)
+        {
+            currentlyEquippedObject.transform.SetParent(equippedItemParent, false);
+            currentlyEquippedObject.transform.localPosition = Vector3.zero;
+            currentlyEquippedObject.transform.localRotation = Quaternion.identity;
+            SetLayerOfEquippedObject();
+        }
+    }
+
+    private void SetEquippedType(SlotContent activeSlot)
+    {
+        if (currentlyEquippedObject == null)
+            typeEquipped = TypeEquipped.None;
+        else if (currentlyEquippedObject.GetComponent<ProjectileWeapon>() != null)
+            typeEquipped = TypeEquipped.LoadableWeapon;
+        else if (activeSlot.quantity > 1)
+            typeEquipped = TypeEquipped.StackableItem;
+        else
+            typeEquipped = TypeEquipped.Misc;
     }
 
     public void ToggleUseEquippedItem(bool use)
     {
-        if (currentlyEquippedObject)
-        {
-            // (temp)
-            currentlyEquippedObject.GetComponent<Weapon_Pistol>().UseWeapon(use);
-        }
+        GetEquippedObjectItem()?.UseItemInput(use);
+    }
+
+    public void AttemptSetReload(bool input)
+    {
+        if (typeEquipped != TypeEquipped.LoadableWeapon) return;
+        if (currentlyEquippedObject?.GetComponent<ProjectileWeapon>() is ProjectileWeapon weapon)
+            weapon.SetReloadInput(input);
     }
 
     private void SetLayerOfEquippedObject()
     {
-        currentlyEquippedObject.layer = equippedItemParent.gameObject.layer;
-        for (int i = 0; i < currentlyEquippedObject.transform.childCount; i++)
-        {
-            currentlyEquippedObject.transform.GetChild(i).gameObject.layer = equippedItemParent.gameObject.layer;
-        }
+        int layerIndex = (int)Mathf.Log(equippedItemLayer.value, 2);
+        SetLayerRecursively(currentlyEquippedObject, layerIndex);
+    }
+
+    private static void SetLayerRecursively(GameObject obj, int layer)
+    {
+        obj.layer = layer;
+        foreach (Transform child in obj.transform)
+            SetLayerRecursively(child.gameObject, layer);
     }
 }

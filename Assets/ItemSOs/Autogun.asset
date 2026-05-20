@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30c96b7052cb25f47a101688fda9cab1, type: 3}
+  m_Name: Autogun
+  m_EditorClassIdentifier: 
+  itemCollectablePrefab: {fileID: 3271180408174662713, guid: 466541158deaef0479a4d230bdba584b, type: 3}
+  itemEquipedPrefab: {fileID: 7335247490902418789, guid: 459e899e0883a9a4082fa9c46f331871, type: 3}
+  itemIcon: {fileID: 21300000, guid: 45209aebb10961b4aba9e870db4d6cb1, type: 3}
+  maxStackSize: 1
+  importantItem: 1

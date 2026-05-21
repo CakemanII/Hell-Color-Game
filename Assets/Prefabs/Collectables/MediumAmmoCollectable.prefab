@@ -237,6 +237,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rotationSpeed: 50
   itemSO: {fileID: 11400000, guid: bb8763808dc09cc4badba5190054e021, type: 2}
-  timeBeforePickupEnabled: 2
+  timeBeforePickupEnabled: 0.25
   canDespawn: 0
   quantity: 1

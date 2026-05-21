@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -31,7 +32,16 @@ public class PlayerInput : MonoBehaviour
     {
         allowLook = locked;
         Cursor.visible = !locked;
-        Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.lockState = CursorLockMode.None;
+
+        if (locked)
+            StartCoroutine(LockCursorNextFrame());
+    }
+
+    private IEnumerator LockCursorNextFrame()
+    {
+        yield return null;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void Move(InputAction.CallbackContext context)

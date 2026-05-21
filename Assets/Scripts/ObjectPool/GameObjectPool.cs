@@ -2,7 +2,6 @@
    when they're finished. New Objects are only created if all the
    current objects are in use. */
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 public class GameObjectPool : MonoBehaviour

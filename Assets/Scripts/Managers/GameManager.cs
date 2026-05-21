@@ -12,7 +12,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private CollectablesManager collectablesManager;
     [SerializeField] private QuestManager questManager;
     [SerializeField] private LevelGenerationManager levelGenerationManager;
-    [SerializeField] private AudioManager audioManager;
     [SerializeField] private EnemySpawnerManager enemySpawnerManager;
 
 
@@ -53,7 +52,7 @@ public class GameManager : MonoBehaviour
         if (currentLevel == -1)
         {
             currentLevel = 1;
-            currentWave = 1;
+            currentWave = 0;
             gameIsActive = false;
             CreateLevel();
         }
@@ -68,12 +67,15 @@ public class GameManager : MonoBehaviour
                 currentWave = 0;
                 gameIsActive = false;
                 AudioManager.Instance.SelectMainMusic();
+                AudioManager.Instance.PlayMusic();
                 QuestManager.Instance.AddScore(currentWave * 150 * currentLevel);
+                QuestManager.Instance.IncrementCompleteWaves();
                 CreateLevel();
             }
             else
             {
                 QuestManager.Instance.AddScore(currentWave * 100 * currentLevel);
+                QuestManager.Instance.IncrementCompleteWaves();
                 SpawnWave();
             }
         }
@@ -156,7 +158,7 @@ public class GameManager : MonoBehaviour
     {
         isGamePaused = true;
         playerInput.SetPlayerInputEnabled(false);
-        audioManager.PauseAudios();
+        AudioManager.Instance.PauseAudios();
         Time.timeScale = 0f;
         gameUI.SetUIBeingDisplayed(UIType.Settings);
     }
@@ -165,7 +167,7 @@ public class GameManager : MonoBehaviour
     {
         isGamePaused = false;
         playerInput.SetPlayerInputEnabled(true);
-        audioManager.PlayMusic();
+        AudioManager.Instance.PlayMusic();
         Time.timeScale = 1f;
         gameUI.SetUIBeingDisplayed(UIType.MainHUD);
     }

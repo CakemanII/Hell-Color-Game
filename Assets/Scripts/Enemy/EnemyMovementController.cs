@@ -45,6 +45,7 @@ public class EnemyController : MonoBehaviour
     private void Start()
     {
         player = GameManager.Instance?.Player;
+        agent.Warp(transform.position);
         SetState(EnemyState.Roam);
     }
 

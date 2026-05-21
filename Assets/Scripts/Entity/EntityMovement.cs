@@ -66,6 +66,15 @@ public class EntityMovement : MonoBehaviour
 
         // Jump
         HandleJump();
+
+        // Duckfix
+
+
+        if (transform.position.y < -25f)
+        {
+            rb.linearVelocity = Vector3.zero;
+            transform.position = Vector3.zero;
+        }
     }
 
     private void HandleJump()

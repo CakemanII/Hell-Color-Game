@@ -1,8 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using TMPro;
 
 public class InventoryUI : MonoBehaviour
 {

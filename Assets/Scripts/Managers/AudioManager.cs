@@ -21,9 +21,9 @@ public class AudioManager : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
 
         SetMusicVolume(PlayerPrefs.GetFloat(MusicVolKey, 1f));
+        PlayMusic();
     }
 
     public void SetMusicVolume(float volume)

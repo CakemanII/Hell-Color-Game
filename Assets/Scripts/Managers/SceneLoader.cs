@@ -12,7 +12,6 @@ public class SceneLoader : MonoBehaviour
     {
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
     }
 
     public void LoadMainMenu() => LoadScene(mainMenuSceneName);

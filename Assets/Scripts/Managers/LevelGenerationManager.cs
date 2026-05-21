@@ -262,6 +262,8 @@ public class LevelGenerationManager : MonoBehaviour
                 Debug.Log($"[LevelGen] Baking NavMesh on {navMeshSurfaces.Length} surface(s)...");
             foreach (NavMeshSurface surface in navMeshSurfaces)
                 if (surface != null) surface.BuildNavMesh();
+
+            yield return null; // let the NavMesh commit before enemies are spawned
         }
 
         // ── Diagnostics ───────────────────────────────────────────────────────

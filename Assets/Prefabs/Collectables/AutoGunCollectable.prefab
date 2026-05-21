@@ -101,8 +101,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2cd435be437f9b4693e7f8f011daa2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rotationSpeed: 50
   itemSO: {fileID: 11400000, guid: fd85629b2a098c942accda25e3597f51, type: 2}
-  timeBeforePickupEnabled: 3
+  timeBeforePickupEnabled: 1.5
   canDespawn: 0
   quantity: 1
 --- !u!54 &6612868941752129898
